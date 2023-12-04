@@ -1,0 +1,11 @@
+{
+  "include": [
+    "$(MODDABLE)/contributed/jsonparser/manifest.json"
+  ],
+  "modules": {
+    "*": [
+      "./jsontree"
+    ]
+  },
+  "preload": "jsontree"
+}
