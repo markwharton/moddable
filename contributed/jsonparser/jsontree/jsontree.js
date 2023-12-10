@@ -1,13 +1,15 @@
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
 
-import { NodeType, VPT } from "jsonparser";
+import { StreamingJSONParser, NodeType, VPT } from "jsonparser";
 
-class JSONTreeNode extends Array {
-    // TODO: review
-    // text;
-    // type;
+class JSONParser extends StreamingJSONParser {
+    constructor() {
+        super(new TreeVPT());
+    }
+}
 
+class TreeNode extends Array {
     constructor(type) {
         super();
         this.type = type;
@@ -48,21 +50,19 @@ class JSONTreeNode extends Array {
     }
 }
 
-class JSONTree extends VPT {
-    // TODO: review
-    // stack;
-
-    constructor(keys) {
-        super(keys);
+class TreeVPT extends VPT {
+    constructor() {
+        super(); // cancel matcher
+        this.root = this.node;
         this.stack = [];
     }
 
-    get root() {
-        return this.node.value;
+    initialize() {
+        return this.root;
     }
 
     makeNode(nodeType) {
-        return new JSONTreeNode(nodeType);
+        return new TreeNode(nodeType);
     }
 
     pop(nodeType) {
@@ -70,8 +70,8 @@ class JSONTree extends VPT {
             return false;
         let node = this.stack.pop();
         // fields are pushed before the name is known, so we have to check and balance the tree
-        // prune node that was rejected because it failed to match any of the keys
-        if (this.node.length === 0 && this.node.text === undefined) {
+        // prune field node that was rejected because it failed to match any of the keys
+        if (this.node.type === NodeType.field && this.node.text === undefined && this.node.length === 0) {
             let index = node.indexOf(this.node);
             node.splice(index, 1);
         }
@@ -80,8 +80,8 @@ class JSONTree extends VPT {
     }
 
     push(nodeType) {
-        let node = this.makeNode(nodeType);
         this.stack.push(this.node);
+        let node = this.makeNode(nodeType);
         this.node.push(node);
         this.node = node;
     }
@@ -89,6 +89,9 @@ class JSONTree extends VPT {
     setText(text) {
         this.node.text = text;
     }
+
+    terminate() {
+    }
 }
 
-export { JSONTree, JSONTreeNode };
+export { JSONParser, JSONParser as JSONTreeParser, TreeNode, TreeVPT };

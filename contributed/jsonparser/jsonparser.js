@@ -1,9 +1,9 @@
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
 
 class JSONParser @ "xs_jsonparser_destructor" {
     constructor(vpt) @ "xs_jsonparser_constructor";
-    initialize(initialStackDepth, initialBufferSize) @ "xs_jsonparser_initialize";
+    initialize(keys, initialStackDepth, initialBufferSize) @ "xs_jsonparser_initialize";
     receive(segment, start, end) @ "xs_jsonparser_receive";
     terminate() @ "xs_jsonparser_terminate";
 }
@@ -12,11 +12,6 @@ JSONParser.receive = 0;
 JSONParser.success = 1;
 
 class Matcher {
-    // TODO: review
-    // func;
-    // init;
-    // term;
-
     constructor(func = undefined, init = undefined, term = undefined) {
         this.func = func;
         this.init = init;
@@ -41,13 +36,6 @@ class Matcher {
 }
 
 class Node {
-    // TODO: review
-    // $;
-    // next;
-    // prev;
-    // text;
-    // type;
-
     constructor(type, prev = undefined) {
         this.type = type;
         if (prev) {
@@ -80,17 +68,11 @@ const NodeType = Object.freeze({
     array: 5,
     object: 6,
     field: 7,
-    root: 8,
+    root: 8
 });
 
 class VPT {
-    // TODO: review
-    // keys;
-    // matcher;
-    // node;
-
-    constructor(keys = undefined, matcher = undefined) {
-        this.keys = keys;
+    constructor(matcher = undefined) {
         this.matcher = matcher;
         this.node = this.makeNode(NodeType.root);
     }
@@ -126,4 +108,4 @@ class VPT {
     }
 }
 
-export { JSONParser, Matcher, Node, NodeType, VPT };
+export { JSONParser, JSONParser as StreamingJSONParser, Matcher, Node, NodeType, VPT };

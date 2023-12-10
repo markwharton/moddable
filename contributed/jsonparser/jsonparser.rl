@@ -1,5 +1,8 @@
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
+
+// This Ragel code is based on the JSON parsing machine by Adrian Thurston.
+// https://github.com/adrian-thurston/netp/blob/master/parse/json.rl
 
 #include "xsmc.h"
 #include "xsHost.h"
@@ -57,7 +60,7 @@ void buffer_char( xsMachine *the, struct jsonparser *fsm, char c )
 bool pop( xsMachine *the, struct jsonparser *fsm, xsSlot *slot )
 {
 	if ( fsm->mark == 0 ) {
-		xsmcCall( xsResult, xsVar(9), xsID_pop, slot, C_NULL );
+		xsmcCall( xsResult, xsVar(1), xsID_pop, slot, C_NULL );
 		return xsmcToBoolean( xsResult );
 	}
 	--fsm->mark;
@@ -67,89 +70,105 @@ bool pop( xsMachine *the, struct jsonparser *fsm, xsSlot *slot )
 void push( xsMachine *the, struct jsonparser *fsm, xsSlot *slot )
 {
 	if ( fsm->mark == 0 )
-		xsmcCall( xsResult, xsVar(9), xsID_push, slot, C_NULL );
+		xsmcCall( xsResult, xsVar(1), xsID_push, slot, C_NULL );
 	else
 		++fsm->mark;
 }
 
 bool pop_null( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(0) );
+	xsResult = xsInteger(0);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_null( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(0) );
+	xsResult = xsInteger(0);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_false( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(1) );
+	xsResult = xsInteger(1);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_false( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(1) );
+	xsResult = xsInteger(1);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_true( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(2) );
+	xsResult = xsInteger(2);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_true( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(2) );
+	xsResult = xsInteger(2);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_number( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(3) );
+	xsResult = xsInteger(3);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_number( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(3) );
+	xsResult = xsInteger(3);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_string( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(4) );
+	xsResult = xsInteger(4);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_string( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(4) );
+	xsResult = xsInteger(4);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_array( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(5) );
+	xsResult = xsInteger(5);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_array( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(5) );
+	xsResult = xsInteger(5);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_object( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(6) );
+	xsResult = xsInteger(6);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_object( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(6) );
+	xsResult = xsInteger(6);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_field( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(7) );
+	xsResult = xsInteger(7);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_field( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(7) );
+	xsResult = xsInteger(7);
+	push( the, fsm, &xsResult );
 }
 
 void set_text( xsMachine *the, struct jsonparser *fsm, char *buffer, int size )
@@ -157,7 +176,7 @@ void set_text( xsMachine *the, struct jsonparser *fsm, char *buffer, int size )
 	if ( fsm->mark == 0 ) {
 		if ( fsm->buffer != C_NULL )
 			xsmcSetStringBuffer( xsResult, fsm->buffer, fsm->size );
-		xsmcCall( xsResult, xsVar(9), xsID_setText, &xsResult, C_NULL );
+		xsmcCall( xsResult, xsVar(1), xsID_setText, &xsResult, C_NULL );
 	}
 }
 
@@ -204,11 +223,11 @@ void set_text( xsMachine *the, struct jsonparser *fsm, char *buffer, int size )
 		@{
 			xsmcSetStringBuffer( xsResult, fsm->buffer, fsm->size );
 			if ( fsm->mark == 0 ) {
-				if ( xsmcTypeOf( xsVar(10) ) != xsUndefinedType ) {
-					xsmcCall( xsVar(11), xsVar(10), xsID_includes, &xsResult, C_NULL );
-					if ( !xsmcToBoolean( xsVar(11) ) ) {
+				if ( xsmcTypeOf( xsVar(0) ) != xsUndefinedType ) {
+					xsmcCall( xsVar(2), xsVar(0), xsID_includes, &xsResult, C_NULL );
+					if ( !xsmcToBoolean( xsVar(2) ) ) {
 						// fields are pushed before the name is known, so we have to check and balance the tree
-						// prune node that was rejected because it failed to match any of the keys
+						// prune field node that was rejected because it failed to match any of the keys
 						pop_field( the, fsm );
 						++fsm->mark;
 					}
@@ -398,7 +417,6 @@ void xs_jsonparser_constructor(xsMachine *the)
 		xsmcSetHostData(xsThis, fsm);
 		fsm->buffer = C_NULL;
 		fsm->stack = C_NULL;
-		fsm->mark = 0;
 	}
 	xsCatch {
 		if (fsm != C_NULL)
@@ -430,22 +448,26 @@ void xs_jsonparser_initialize(xsMachine *the)
 	if (fsm->stack != C_NULL)
 		c_free(fsm->stack);
 
-	fsm->bs = xsmcArgc >= 2 ? xsmcToInteger(xsArg(1)) : 64; // optional initialBufferSize (default value is 64)
+	fsm->bs = xsmcArgc >= 3 ? xsmcToInteger(xsArg(2)) : 64; // optional initialBufferSize (default value is 64)
 	fsm->buffer = c_malloc(fsm->bs * sizeof(char));
 	if (fsm->buffer == C_NULL)
 		xsUnknownError((char *)not_enough_memory);
 	fsm->size = 0;
 
-	fsm->sd = xsmcArgc >= 1 ? xsmcToInteger(xsArg(0)) : 8; // optional initialStackDepth (default value is 8)
+	fsm->sd = xsmcArgc >= 2 ? xsmcToInteger(xsArg(1)) : 8; // optional initialStackDepth (default value is 8)
 	fsm->stack = c_malloc(fsm->sd * sizeof(int));
 	if (fsm->stack == C_NULL)
 		xsUnknownError((char *)not_enough_memory);
 
 	%% write init;
 
-	xsmcVars(1);
-	xsmcGet(xsVar(0), xsThis, xsID_vpt);
-	xsmcCall(xsResult, xsVar(0), xsID_initialize, C_NULL);
+	fsm->mark = 0;
+
+	xsResult = xsmcArgc >= 1 ? xsArg(0) : xsUndefined;
+	xsmcSet(xsThis, xsID_keys, xsResult); // optional keys array
+
+	xsmcGet(xsResult, xsThis, xsID_vpt);
+	xsmcCall(xsResult, xsResult, xsID_initialize, C_NULL);
 }
 
 void xs_jsonparser_receive(xsMachine *the)
@@ -455,19 +477,10 @@ void xs_jsonparser_receive(xsMachine *the)
 	int count = 0;
 	if (fsm->cs != JSON_error) {
 
-		xsmcVars(12);
-		xsmcSetInteger(xsVar(0), 0); // null
-		xsmcSetInteger(xsVar(1), 1); // false
-		xsmcSetInteger(xsVar(2), 2); // true
-		xsmcSetInteger(xsVar(3), 3); // number
-		xsmcSetInteger(xsVar(4), 4); // string
-		xsmcSetInteger(xsVar(5), 5); // array
-		xsmcSetInteger(xsVar(6), 6); // object
-		xsmcSetInteger(xsVar(7), 7); // field
-		xsmcSetInteger(xsVar(8), 8); // root
-		xsmcGet(xsVar(9), xsThis, xsID_vpt);
-		xsmcGet(xsVar(10), xsVar(9), xsID_keys);
-		xsmcSetUndefined(xsVar(11)); // for includes
+		xsmcVars(3);
+		xsmcGet(xsVar(0), xsThis, xsID_keys);
+		xsmcGet(xsVar(1), xsThis, xsID_vpt);
+		xsmcSetUndefined(xsVar(2)); // for xsID_includes result
 
 		// be careful with XS macros between here and copying our segment string into the buffer
 
@@ -519,15 +532,14 @@ void xs_jsonparser_terminate(xsMachine *the)
 		fsm->stack = C_NULL;
 	}
 
-	xsmcVars(2);
-	xsmcGet(xsVar(0), xsThis, xsID_constructor);
-	xsmcGet(xsVar(1), xsThis, xsID_vpt);
-	xsmcCall(xsResult, xsVar(1), xsID_terminate, C_NULL); // discard result
+	xsmcGet(xsResult, xsThis, xsID_vpt);
+	xsmcCall(xsResult, xsResult, xsID_terminate, C_NULL);
 
+	xsmcGet(xsResult, xsThis, xsID_constructor);
 	if (fsm->cs == JSON_error)
-		xsmcGet(xsResult, xsVar(0), xsID_failure);
+		xsmcGet(xsResult, xsResult, xsID_failure);
 	else if (fsm->cs >= JSON_first_final)
-		xsmcGet(xsResult, xsVar(0), xsID_success);
+		xsmcGet(xsResult, xsResult, xsID_success);
 	else
-		xsmcGet(xsResult, xsVar(0), xsID_receive);
+		xsmcGet(xsResult, xsResult, xsID_receive);
 }

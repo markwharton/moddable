@@ -1,5 +1,6 @@
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
+"use strict";
 
 import { JSONParser, NodeType, VPT } from "jsonparser";
 
@@ -10,12 +11,8 @@ let fragment3 = 'lse,"isException":false,"isReminderSet":false,"start":{"dateTim
 const keys = ["value", "scheduleItems", "status", "start", "end", "dateTime", "error"];
 
 class TracerVPT extends VPT {
-    // TODO: review
-    // depth;
-    // space;
-
-    constructor(keys) {
-        super(keys);
+    constructor() {
+        super(); // cancel matcher
         this.depth = 0;
         this.space = 4;
     }
@@ -39,10 +36,9 @@ class TracerVPT extends VPT {
     }
 }
 
-let vpt = new TracerVPT(keys);
-let parser = new JSONParser(vpt);
+let parser = new JSONParser(new TracerVPT());
 
-parser.initialize();
+parser.initialize(keys);
 
 parser.receive(fragment1);
 parser.receive(fragment2);

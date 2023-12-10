@@ -1,5 +1,6 @@
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
+"use strict";
 
 import { JSONParser, Matcher, NodeType, VPT } from "jsonparser";
 
@@ -9,7 +10,7 @@ let fragment3 = 'lse,"isException":false,"isReminderSet":false,"start":{"dateTim
 
 let keys = ["value", "scheduleItems", "status", "start", "end", "dateTime", "error"];
 
-let vpt = new VPT(keys, new Matcher(
+let parser = new JSONParser(new VPT(new Matcher(
     function (vpt, node) {
         let schedule = this.schedule;
         switch (node.type) {
@@ -46,12 +47,10 @@ let vpt = new VPT(keys, new Matcher(
             count: 0, error: false, meetings: []
         };
     }
-));
-
-let parser = new JSONParser(vpt);
+)));
 
 // data example
-let data = parser.initialize();
+let data = parser.initialize(keys);
 trace(JSON.stringify(data.schedule) + "\n");
 
 // segment example

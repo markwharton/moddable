@@ -1,7 +1,10 @@
 
 #line 1 "jsonparser.rl"
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
+
+// This Ragel code is based on the JSON parsing machine by Adrian Thurston.
+// https://github.com/adrian-thurston/netp/blob/master/parse/json.rl
 
 #include "xsmc.h"
 #include "xsHost.h"
@@ -59,7 +62,7 @@ void buffer_char( xsMachine *the, struct jsonparser *fsm, char c )
 bool pop( xsMachine *the, struct jsonparser *fsm, xsSlot *slot )
 {
 	if ( fsm->mark == 0 ) {
-		xsmcCall( xsResult, xsVar(9), xsID_pop, slot, C_NULL );
+		xsmcCall( xsResult, xsVar(1), xsID_pop, slot, C_NULL );
 		return xsmcToBoolean( xsResult );
 	}
 	--fsm->mark;
@@ -69,89 +72,105 @@ bool pop( xsMachine *the, struct jsonparser *fsm, xsSlot *slot )
 void push( xsMachine *the, struct jsonparser *fsm, xsSlot *slot )
 {
 	if ( fsm->mark == 0 )
-		xsmcCall( xsResult, xsVar(9), xsID_push, slot, C_NULL );
+		xsmcCall( xsResult, xsVar(1), xsID_push, slot, C_NULL );
 	else
 		++fsm->mark;
 }
 
 bool pop_null( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(0) );
+	xsResult = xsInteger(0);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_null( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(0) );
+	xsResult = xsInteger(0);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_false( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(1) );
+	xsResult = xsInteger(1);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_false( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(1) );
+	xsResult = xsInteger(1);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_true( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(2) );
+	xsResult = xsInteger(2);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_true( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(2) );
+	xsResult = xsInteger(2);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_number( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(3) );
+	xsResult = xsInteger(3);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_number( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(3) );
+	xsResult = xsInteger(3);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_string( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(4) );
+	xsResult = xsInteger(4);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_string( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(4) );
+	xsResult = xsInteger(4);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_array( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(5) );
+	xsResult = xsInteger(5);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_array( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(5) );
+	xsResult = xsInteger(5);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_object( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(6) );
+	xsResult = xsInteger(6);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_object( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(6) );
+	xsResult = xsInteger(6);
+	push( the, fsm, &xsResult );
 }
 
 bool pop_field( xsMachine *the, struct jsonparser *fsm )
 {
-	return pop( the, fsm, &xsVar(7) );
+	xsResult = xsInteger(7);
+	return pop( the, fsm, &xsResult );
 }
 
 void push_field( xsMachine *the, struct jsonparser *fsm )
 {
-	push( the, fsm, &xsVar(7) );
+	xsResult = xsInteger(7);
+	push( the, fsm, &xsResult );
 }
 
 void set_text( xsMachine *the, struct jsonparser *fsm, char *buffer, int size )
@@ -159,16 +178,16 @@ void set_text( xsMachine *the, struct jsonparser *fsm, char *buffer, int size )
 	if ( fsm->mark == 0 ) {
 		if ( fsm->buffer != C_NULL )
 			xsmcSetStringBuffer( xsResult, fsm->buffer, fsm->size );
-		xsmcCall( xsResult, xsVar(9), xsID_setText, &xsResult, C_NULL );
+		xsmcCall( xsResult, xsVar(1), xsID_setText, &xsResult, C_NULL );
 	}
 }
 
 
-#line 358 "jsonparser.rl"
+#line 377 "jsonparser.rl"
 
 
 
-#line 172 "jsonparser.c"
+#line 191 "jsonparser.c"
 static const unsigned char _JSON_key_offsets[] ICACHE_XS6RO_ATTR = {
 	0, 0, 0, 1, 3, 5, 9, 12, 
 	17, 19, 24, 28, 30, 35, 40, 41, 
@@ -299,7 +318,7 @@ static const int JSON_en_value = 31;
 static const int JSON_en_main = 1;
 
 
-#line 361 "jsonparser.rl"
+#line 380 "jsonparser.rl"
 
 #pragma unused (JSON_en_name)
 #pragma unused (JSON_en_number)
@@ -340,7 +359,6 @@ void xs_jsonparser_constructor(xsMachine *the)
 		xsmcSetHostData(xsThis, fsm);
 		fsm->buffer = C_NULL;
 		fsm->stack = C_NULL;
-		fsm->mark = 0;
 	}
 	xsCatch {
 		if (fsm != C_NULL)
@@ -372,29 +390,33 @@ void xs_jsonparser_initialize(xsMachine *the)
 	if (fsm->stack != C_NULL)
 		c_free(fsm->stack);
 
-	fsm->bs = xsmcArgc >= 2 ? xsmcToInteger(xsArg(1)) : 64; // optional initialBufferSize (default value is 64)
+	fsm->bs = xsmcArgc >= 3 ? xsmcToInteger(xsArg(2)) : 64; // optional initialBufferSize (default value is 64)
 	fsm->buffer = c_malloc(fsm->bs * sizeof(char));
 	if (fsm->buffer == C_NULL)
 		xsUnknownError((char *)not_enough_memory);
 	fsm->size = 0;
 
-	fsm->sd = xsmcArgc >= 1 ? xsmcToInteger(xsArg(0)) : 8; // optional initialStackDepth (default value is 8)
+	fsm->sd = xsmcArgc >= 2 ? xsmcToInteger(xsArg(1)) : 8; // optional initialStackDepth (default value is 8)
 	fsm->stack = c_malloc(fsm->sd * sizeof(int));
 	if (fsm->stack == C_NULL)
 		xsUnknownError((char *)not_enough_memory);
 
 	
-#line 388 "jsonparser.c"
+#line 406 "jsonparser.c"
 	{
 	 fsm->cs = JSON_start;
 	 fsm->top = 0;
 	}
 
-#line 445 "jsonparser.rl"
+#line 463 "jsonparser.rl"
 
-	xsmcVars(1);
-	xsmcGet(xsVar(0), xsThis, xsID_vpt);
-	xsmcCall(xsResult, xsVar(0), xsID_initialize, C_NULL);
+	fsm->mark = 0;
+
+	xsResult = xsmcArgc >= 1 ? xsArg(0) : xsUndefined;
+	xsmcSet(xsThis, xsID_keys, xsResult); // optional keys array
+
+	xsmcGet(xsResult, xsThis, xsID_vpt);
+	xsmcCall(xsResult, xsResult, xsID_initialize, C_NULL);
 }
 
 void xs_jsonparser_receive(xsMachine *the)
@@ -404,19 +426,10 @@ void xs_jsonparser_receive(xsMachine *the)
 	int count = 0;
 	if (fsm->cs != JSON_error) {
 
-		xsmcVars(12);
-		xsmcSetInteger(xsVar(0), 0); // null
-		xsmcSetInteger(xsVar(1), 1); // false
-		xsmcSetInteger(xsVar(2), 2); // true
-		xsmcSetInteger(xsVar(3), 3); // number
-		xsmcSetInteger(xsVar(4), 4); // string
-		xsmcSetInteger(xsVar(5), 5); // array
-		xsmcSetInteger(xsVar(6), 6); // object
-		xsmcSetInteger(xsVar(7), 7); // field
-		xsmcSetInteger(xsVar(8), 8); // root
-		xsmcGet(xsVar(9), xsThis, xsID_vpt);
-		xsmcGet(xsVar(10), xsVar(9), xsID_keys);
-		xsmcSetUndefined(xsVar(11)); // for includes
+		xsmcVars(3);
+		xsmcGet(xsVar(0), xsThis, xsID_keys);
+		xsmcGet(xsVar(1), xsThis, xsID_vpt);
+		xsmcSetUndefined(xsVar(2)); // for xsID_includes result
 
 		// be careful with XS macros between here and copying our segment string into the buffer
 
@@ -439,7 +452,7 @@ void xs_jsonparser_receive(xsMachine *the)
 					const char *pe = buffer + size;
 
 					
-#line 443 "jsonparser.c"
+#line 456 "jsonparser.c"
 	{
 	int _klen;
 	const char *_keys;
@@ -507,19 +520,19 @@ _match:
 
 	switch ( c_read8( &_JSON_trans_actions[_trans] ) ) {
 	case 2:
-#line 193 "jsonparser.rl"
+#line 212 "jsonparser.rl"
 	{ buffer_char( the, fsm, c_read8( p ) ); }
 	break;
 	case 3:
-#line 204 "jsonparser.rl"
+#line 223 "jsonparser.rl"
 	{
 			xsmcSetStringBuffer( xsResult, fsm->buffer, fsm->size );
 			if ( fsm->mark == 0 ) {
-				if ( xsmcTypeOf( xsVar(10) ) != xsUndefinedType ) {
-					xsmcCall( xsVar(11), xsVar(10), xsID_includes, &xsResult, C_NULL );
-					if ( !xsmcToBoolean( xsVar(11) ) ) {
+				if ( xsmcTypeOf( xsVar(0) ) != xsUndefinedType ) {
+					xsmcCall( xsVar(2), xsVar(0), xsID_includes, &xsResult, C_NULL );
+					if ( !xsmcToBoolean( xsVar(2) ) ) {
 						// fields are pushed before the name is known, so we have to check and balance the tree
-						// prune node that was rejected because it failed to match any of the keys
+						// prune field node that was rejected because it failed to match any of the keys
 						pop_field( the, fsm );
 						++fsm->mark;
 					}
@@ -531,7 +544,7 @@ _match:
 		}
 	break;
 	case 5:
-#line 230 "jsonparser.rl"
+#line 249 "jsonparser.rl"
 	{
 			set_text( the, fsm, fsm->buffer, fsm->size );
 			fsm->size = 0;
@@ -540,43 +553,43 @@ _match:
 		}
 	break;
 	case 9:
-#line 243 "jsonparser.rl"
+#line 262 "jsonparser.rl"
 	{ buffer_char( the, fsm, '"' ); }
 	break;
 	case 11:
-#line 244 "jsonparser.rl"
+#line 263 "jsonparser.rl"
 	{ buffer_char( the, fsm, '\\' ); }
 	break;
 	case 10:
-#line 245 "jsonparser.rl"
+#line 264 "jsonparser.rl"
 	{ buffer_char( the, fsm, '/' ); }
 	break;
 	case 12:
-#line 246 "jsonparser.rl"
+#line 265 "jsonparser.rl"
 	{ buffer_char( the, fsm, '\b' ); }
 	break;
 	case 13:
-#line 247 "jsonparser.rl"
+#line 266 "jsonparser.rl"
 	{ buffer_char( the, fsm, '\f' ); }
 	break;
 	case 14:
-#line 248 "jsonparser.rl"
+#line 267 "jsonparser.rl"
 	{ buffer_char( the, fsm, '\n' ); }
 	break;
 	case 15:
-#line 249 "jsonparser.rl"
+#line 268 "jsonparser.rl"
 	{ buffer_char( the, fsm, '\r' ); }
 	break;
 	case 16:
-#line 250 "jsonparser.rl"
+#line 269 "jsonparser.rl"
 	{ buffer_char( the, fsm, '\t' ); }
 	break;
 	case 17:
-#line 252 "jsonparser.rl"
+#line 271 "jsonparser.rl"
 	{ buffer_char( the, fsm, '?' ); }
 	break;
 	case 8:
-#line 257 "jsonparser.rl"
+#line 276 "jsonparser.rl"
 	{
 		set_text( the, fsm, fsm->buffer, fsm->size );
 		fsm->size = 0;
@@ -585,7 +598,7 @@ _match:
 	}
 	break;
 	case 1:
-#line 264 "jsonparser.rl"
+#line 283 "jsonparser.rl"
 	{ p--; {
 		if ( fsm->top == fsm->sd ) {
 			fsm->stack = grow_stack( fsm->stack, &fsm->sd );
@@ -595,14 +608,14 @@ _match:
 	{ fsm->stack[ fsm->top++] =  fsm->cs;  fsm->cs = 31;goto _again;}} }
 	break;
 	case 18:
-#line 279 "jsonparser.rl"
+#line 298 "jsonparser.rl"
 	{
 			if ( !pop_array( the, fsm ) ) { fsm->cs = (JSON_error); goto _again;}
 			{ fsm->cs =  fsm->stack[-- fsm->top]; goto _again;}
 		}
 	break;
 	case 19:
-#line 284 "jsonparser.rl"
+#line 303 "jsonparser.rl"
 	{ push_field( the, fsm ); p--; {
 		if ( fsm->top == fsm->sd ) {
 			fsm->stack = grow_stack( fsm->stack, &fsm->sd );
@@ -612,13 +625,13 @@ _match:
 	{ fsm->stack[ fsm->top++] =  fsm->cs;  fsm->cs = 2;goto _again;}} }
 	break;
 	case 21:
-#line 302 "jsonparser.rl"
+#line 321 "jsonparser.rl"
 	{
 					if ( !pop_field( the, fsm ) ) { fsm->cs = (JSON_error); goto _again;}
 				}
 	break;
 	case 22:
-#line 309 "jsonparser.rl"
+#line 328 "jsonparser.rl"
 	{
 			if ( !pop_field( the, fsm ) ) { fsm->cs = (JSON_error); goto _again;}
 			if ( !pop_object( the, fsm ) ) { fsm->cs = (JSON_error); goto _again;}
@@ -626,26 +639,26 @@ _match:
 		}
 	break;
 	case 20:
-#line 320 "jsonparser.rl"
+#line 339 "jsonparser.rl"
 	{
 			if ( !pop_object( the, fsm ) ) { fsm->cs = (JSON_error); goto _again;}
 			{ fsm->cs =  fsm->stack[-- fsm->top]; goto _again;}
 		}
 	break;
 	case 28:
-#line 326 "jsonparser.rl"
+#line 345 "jsonparser.rl"
 	{ push_null( the, fsm ); pop_null( the, fsm ); }
 	break;
 	case 27:
-#line 327 "jsonparser.rl"
+#line 346 "jsonparser.rl"
 	{ push_false( the, fsm ); pop_false( the, fsm ); }
 	break;
 	case 29:
-#line 328 "jsonparser.rl"
+#line 347 "jsonparser.rl"
 	{ push_true( the, fsm ); pop_true( the, fsm ); }
 	break;
 	case 24:
-#line 329 "jsonparser.rl"
+#line 348 "jsonparser.rl"
 	{ push_number( the, fsm ); p--; {
 		if ( fsm->top == fsm->sd ) {
 			fsm->stack = grow_stack( fsm->stack, &fsm->sd );
@@ -655,7 +668,7 @@ _match:
 	{ fsm->stack[ fsm->top++] =  fsm->cs;  fsm->cs = 5;goto _again;}} }
 	break;
 	case 23:
-#line 330 "jsonparser.rl"
+#line 349 "jsonparser.rl"
 	{ push_string( the, fsm ); p--; {
 		if ( fsm->top == fsm->sd ) {
 			fsm->stack = grow_stack( fsm->stack, &fsm->sd );
@@ -665,7 +678,7 @@ _match:
 	{ fsm->stack[ fsm->top++] =  fsm->cs;  fsm->cs = 14;goto _again;}} }
 	break;
 	case 25:
-#line 331 "jsonparser.rl"
+#line 350 "jsonparser.rl"
 	{ push_array( the, fsm ); p--; {
 		if ( fsm->top == fsm->sd ) {
 			fsm->stack = grow_stack( fsm->stack, &fsm->sd );
@@ -675,7 +688,7 @@ _match:
 	{ fsm->stack[ fsm->top++] =  fsm->cs;  fsm->cs = 21;goto _again;}} }
 	break;
 	case 26:
-#line 332 "jsonparser.rl"
+#line 351 "jsonparser.rl"
 	{ push_object( the, fsm ); p--; {
 		if ( fsm->top == fsm->sd ) {
 			fsm->stack = grow_stack( fsm->stack, &fsm->sd );
@@ -685,31 +698,31 @@ _match:
 	{ fsm->stack[ fsm->top++] =  fsm->cs;  fsm->cs = 25;goto _again;}} }
 	break;
 	case 30:
-#line 346 "jsonparser.rl"
+#line 365 "jsonparser.rl"
 	{
 				p--;
 				{ fsm->cs =  fsm->stack[-- fsm->top]; goto _again;}
 			}
 	break;
 	case 6:
-#line 226 "jsonparser.rl"
+#line 245 "jsonparser.rl"
 	{ fsm->dot = true; }
-#line 193 "jsonparser.rl"
+#line 212 "jsonparser.rl"
 	{ buffer_char( the, fsm, c_read8( p ) ); }
 	break;
 	case 7:
-#line 227 "jsonparser.rl"
+#line 246 "jsonparser.rl"
 	{ fsm->E = true; }
-#line 193 "jsonparser.rl"
+#line 212 "jsonparser.rl"
 	{ buffer_char( the, fsm, c_read8( p ) ); }
 	break;
 	case 4:
-#line 228 "jsonparser.rl"
+#line 247 "jsonparser.rl"
 	{ fsm->dot = false; fsm->E = false; }
-#line 193 "jsonparser.rl"
+#line 212 "jsonparser.rl"
 	{ buffer_char( the, fsm, c_read8( p ) ); }
 	break;
-#line 713 "jsonparser.c"
+#line 726 "jsonparser.c"
 	}
 
 _again:
@@ -721,7 +734,7 @@ _again:
 	_out: {}
 	}
 
-#line 493 "jsonparser.rl"
+#line 506 "jsonparser.rl"
 
 					c_free(buffer);
 					count = size;
@@ -751,15 +764,14 @@ void xs_jsonparser_terminate(xsMachine *the)
 		fsm->stack = C_NULL;
 	}
 
-	xsmcVars(2);
-	xsmcGet(xsVar(0), xsThis, xsID_constructor);
-	xsmcGet(xsVar(1), xsThis, xsID_vpt);
-	xsmcCall(xsResult, xsVar(1), xsID_terminate, C_NULL); // discard result
+	xsmcGet(xsResult, xsThis, xsID_vpt);
+	xsmcCall(xsResult, xsResult, xsID_terminate, C_NULL);
 
+	xsmcGet(xsResult, xsThis, xsID_constructor);
 	if (fsm->cs == JSON_error)
-		xsmcGet(xsResult, xsVar(0), xsID_failure);
+		xsmcGet(xsResult, xsResult, xsID_failure);
 	else if (fsm->cs >= JSON_first_final)
-		xsmcGet(xsResult, xsVar(0), xsID_success);
+		xsmcGet(xsResult, xsResult, xsID_success);
 	else
-		xsmcGet(xsResult, xsVar(0), xsID_receive);
+		xsmcGet(xsResult, xsResult, xsID_receive);
 }

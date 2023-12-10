@@ -1,5 +1,6 @@
-// Copyright 2023 Mark Wharton (mark@jynx.com)
+// Copyright (c) 2023 Mark Wharton
 // https://opensource.org/license/mit/
+"use strict";
 
 import { JSONParser, NodeType, VPT } from "jsonparser";
 
@@ -10,13 +11,9 @@ let fragment3 = 'lse,"isException":false,"isReminderSet":false,"start":{"dateTim
 const keys = ["value", "scheduleItems", "status", "start", "end", "dateTime", "error"];
 
 class BuilderVPT extends VPT {
-    // TODO: review
-    // keyz;
-    // mark;
-
-    constructor(keyz) {
-        super(); // drop keys
-        this.keyz = keyz;
+    constructor(keys) {
+        super(); // cancel matcher
+        this.keys = keys;
         this.mark = 0;
     }
 
@@ -39,12 +36,12 @@ class BuilderVPT extends VPT {
         if (this.mark === 0) {
             if (this.node.type === NodeType.field) {
                 let want = false;
-                if (this.keyz) {
-                    if (this.keyz.includes(text))
+                if (this.keys) {
+                    if (this.keys.includes(text))
                         want = true;
                     else {
                         // fields are pushed before the name is known, so we have to check and balance the tree
-                        // prune node that was rejected because it failed to match any of the keys
+                        // prune field node that was rejected because it failed to match any of the keys
                         this.pop(this.node.type);
                         this.mark++;
                     }
@@ -57,10 +54,9 @@ class BuilderVPT extends VPT {
     }
 }
 
-let vpt = new BuilderVPT(keys);
-let parser = new JSONParser(vpt);
+let parser = new JSONParser(new BuilderVPT(keys)); // JavaScript keys test
 
-parser.initialize();
+parser.initialize(undefined); // these keys are undefined for the JavaScript keys test
 
 parser.receive(fragment1);
 parser.receive(fragment2);

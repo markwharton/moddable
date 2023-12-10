@@ -6,9 +6,15 @@ The Moddable SDK JSON Parser is designed for parsing JSON data streams in embedd
 
 ### License and Credits
 
-The JSON Parser modules and examples are released under the [MIT License](https://opensource.org/license/mit/). Please refer to the file named [COPYING](COPYING) in the source for details.
+The JSON Parser modules and examples are released under the [MIT License](https://opensource.org/license/mit/). Please refer to the file named [COPYING](COPYING) in the source for details. They are contributed to Moddable under the [Contributor License Agreement](../../licenses/readme.md#contributor-license-agreement).
 
-The JSON Parser module utilizes Ragel to generate robust [parser code](./jsonparser.c). Ragel was designed and developed by [Adrian Thurston](https://github.com/adrian-thurston). For more information about using Ragel, refer to the [Ragel State Machine Compiler](http://www.colm.net/open-source/ragel/) documentation. Thank you, Adrian, for creating such an excellent tool.
+#### Ragel
+
+The JSON Parser module utilizes Ragel to generate robust [parser code](./jsonparser.c). Ragel was designed and developed by [Adrian Thurston](https://github.com/adrian-thurston), and it is known for its efficiency in generating state machine-based code for lexical analyzers and parsers. For more information about using Ragel, refer to the [Ragel State Machine Compiler](http://www.colm.net/open-source/ragel/) documentation.
+
+#### HeliMods
+
+Special thanks to [HeliMods](https://www.helimods.com) and [Marc Treble](https://github.com/mtreble) for initiating and supporting the Meeting Room Display project. It turned out that the project required parsing JSON data streams greater than the available memory on a [Moddable Three](https://www.moddable.com/moddable-three) device.
 
 ### Classes
 
@@ -21,8 +27,8 @@ constructor(vpt) @ "xs_jsonparser_constructor";
 Creates a new `JSONParser` instance.
 
 Methods
-- `initialize(initialStackDepth, initialBufferSize) @ "xs_jsonparser_initialize";`
-  - Initializes the JSON parser with the specified stack depth and buffer size.
+- `initialize(keys, initialStackDepth, initialBufferSize) @ "xs_jsonparser_initialize";`
+  - Initializes the JSON parser with the specified keys, stack depth, and buffer size.
 - `receive(segment, start, end) @ "xs_jsonparser_receive";`
   - Receives a JSON data segment for parsing.
 - `terminate() @ "xs_jsonparser_terminate";`
@@ -72,9 +78,9 @@ Methods
 
 Constructor
 ```javascript
-constructor(keys = undefined, matcher = undefined);
+constructor(matcher = undefined);
 ```
-Creates a new `VPT` (Virtual Parse Tree) instance with optional keys and a matcher.
+Creates a new `VPT` (Virtual Parse Tree) instance with optional matcher.
 
 Methods
 - `initialize();`
@@ -130,7 +136,7 @@ Generate `-T1` output style code:
 ragel -T1 jsonparser.rl > jsonparser.c
 ```
 
-Update `jsonparser.c` by adding `ICACHE_XS6RO_ATTR` and integrating read macros for accessing static const data in ROM, using the regular expression search and replace feature of your IDE:
+Update `jsonparser.c` by adding `ICACHE_XS6RO_ATTR` and integrating read macros for accessing static const data in ROM. Using the regular expression search and replace feature of your IDE:
 
 Step 1
 - Search: `\[\] = \{`
@@ -160,17 +166,51 @@ Compile the code and test the changes to confirm that everything works as expect
 - There are no [jsontree.d.ts](../../typings/jsontree.d.ts) type definitions and no [jsontree](../../tests/contributed/jsonparser/jsontree) tests.
 - JSON.parse() like reviver functionality is not supported.
 - xsUnknownError with and without xsTry/xsCatch.
+- Some `TODO: review` items to address.
 
 ### References
 
 - https://ecma-international.org/publications-and-standards/standards/ecma-404
 - https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf
 - https://www.colm.net/files/ragel/ragel-guide-6.10.pdf
+
 <!--
+Additional References
 https://419.ecma-international.org
+https://daniel.haxx.se/blog/2016/11/14/i-have-toyota-corola/
 https://ecma-international.org/publications-and-standards/standards/ecma-419/
 https://ecma-international.org/wp-content/uploads/ECMA-419_2nd_edition_june_2023.pdf
 https://unicode.org/charts/PDF/UFFF0.pdf
 https://unicode.org/charts/nameslist/n_FFF0.html
 https://www.moddable.com/embedded-javascript
+-->
+
+<!--
+Creating .d.ts Files
+Search: `@ "xs_jsonparser_(constructor|initialize|receive|terminate)"`
+Replace: `{}`
+Search: `@ "xs_jsonparser_destructor" `
+Replace: `{}`
+https://github.com/nvm-sh/nvm
+https://github.com/tsdjs/tsd (not used, but could be interesting)
+https://www.typescriptlang.org/docs/handbook/declaration-files/dts-from-js.html
+nvm install 16
+mkdir types
+npx -p typescript tsc jsonparser.js --declaration --allowJs --emitDeclarationOnly --outDir types
+npx -p typescript tsc jsontree/jsontree.js --declaration --allowJs --emitDeclarationOnly --outDir types
+-->
+
+<!--
+import() and Tree shaking
+https://developer.mozilla.org/en-US/docs/Glossary/Tree_shaking
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
+https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
+https://tc39.es/ecma262/multipage/ecmascript-language-expressions.html#sec-import-calls
+-->
+
+<!--
+General questions, relating to UTF or Encoding Form
+https://unicode.org/faq/utf_bom.html
+CESU-8	https://unicode.org/faq/utf_bom.html#utf8-4
+UCS-2	https://unicode.org/faq/utf_bom.html#utf16-11
 -->
