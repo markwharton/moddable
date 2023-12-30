@@ -21,7 +21,8 @@ let result = parser.status;
 if (result === JSONParser.success) {
     trace(JSON.stringify(parser.root.value) + "\n");
     trace("success!\n");
-} else
+}
+else
     trace(`result: ${result}\n`);
 
 parser.close();
