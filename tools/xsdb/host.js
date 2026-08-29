@@ -19,8 +19,8 @@
  */
 
 /*
-	The host seam: everything xsdb needs from the operating system, implemented natively per platform
-	(mac/xsdb.c today). Keep this surface small; a new platform implements exactly these functions.
+	The host seam: everything xsdb needs from the operating system, implemented natively in host/xsdbhost.c
+	(POSIX) with a run loop per platform (mac/, lin/). Keep this surface small; a new platform implements exactly these functions.
 */
 
 export class Host {
@@ -38,9 +38,7 @@ export class Host {
 	static kill(pid, signal) @ "xs_host_kill";
 	static execute(path, args, timeout) @ "xs_host_execute";	// blocks; { status, stdout, stderr }
 
-	static get platform() {
-		return "mac";
-	}
+	static get platform() @ "xs_host_platform";		// "mac" | "lin"
 
 	static join(...parts) {
 		return parts.filter(part => part !== undefined && part !== "").join("/").replaceAll(/\/+/g, "/");

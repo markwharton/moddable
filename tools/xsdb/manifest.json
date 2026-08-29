@@ -33,7 +33,8 @@
 		"x-cli-mac": {
 			"modules": {
 				"*": [
-					"./mac/xsdb",
+					"./host/*",
+					"./mac/*",
 					"$(MODULES)/network/socket/*",
 					"$(MODULES)/network/socket/mac/*",
 					"$(MODULES)/base/timer/timer",
@@ -50,13 +51,30 @@
 			]
 		},
 		"x-cli-lin": {
-			"error": "xsdb is not yet ported to Linux; use tools/xsbug-log"
+			"modules": {
+				"*": [
+					"./host/*",
+					"./lin/*",
+					"$(MODULES)/network/socket/*",
+					"$(MODULES)/network/socket/lin/*",
+					"$(MODULES)/base/timer/timer",
+					"$(MODULES)/base/timer/modTimer",
+					"$(MODULES)/base/timer/lin/*",
+					"$(MODULES)/base/time/*",
+					"$(MODULES)/base/time/lin/*"
+				]
+			},
+			"preload": [
+				"socket",
+				"timer",
+				"time"
+			]
 		},
 		"x-cli-win": {
 			"error": "xsdb is not yet ported to Windows; use tools/xsbug-log"
 		},
 		"...": {
-			"error": "build xsdb with -p x-cli-mac"
+			"error": "build xsdb with -p x-cli-mac or -p x-cli-lin"
 		}
 	}
 }

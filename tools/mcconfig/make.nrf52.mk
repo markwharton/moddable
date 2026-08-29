@@ -21,7 +21,7 @@ HOST_OS := $(shell uname)
 ifeq ($(HOST_OS),Darwin)
 	XSDB = $(MODDABLE)/build/bin/mac/release/xsdb
 else
-	XSDB = node $(MODDABLE)/tools/xsbug-log/xsbug-log.js
+	XSDB = $(MODDABLE)/build/bin/lin/release/xsdb
 endif
 HOST_CPU := $(shell uname -m)
 

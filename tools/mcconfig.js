@@ -1513,7 +1513,7 @@ export default class extends Tool {
 							start_xsbug_cmd = `env XSBUG_PROJECT=${this.mainPath} ${this.buildPath}/devices/zephyr/config/lin_start_xsbug && `;
 					}
 					
-					const xsdb = (this.currentPlatform === "mac") ? `${this.moddablePath}/build/bin/mac/release/xsdb` : `node ${this.moddablePath}/tools/xsbug-log/xsbug-log.js`;
+					const xsdb = `${this.moddablePath}/build/bin/${this.currentPlatform}/release/xsdb`;
 					
 					let debugger_cmd = `serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
 					if (this.xsbugLaunch === "log") {

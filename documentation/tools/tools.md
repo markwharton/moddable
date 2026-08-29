@@ -85,9 +85,9 @@ mcconfig [manifest] [-d] [-f format] [-i] [-m] [-o directory] [-p platform] [-r 
 
 > **Note**: To generate a release build, omit both `-d` and `-i` from the command line.
 
-> **Note**: On macOS, `-dl` runs the `xsdb` binary built with the SDK tools. On Linux and Windows, `-dl` requires Node.js on your build system and you must first run `npm install` in `$MODDABLE/tools/xsbug-log`.
+> **Note**: On macOS and Linux, `-dl` runs the `xsdb` binary built with the SDK tools. On Windows, `-dl` requires Node.js on your build system and you must first run `npm install` in `$MODDABLE/tools/xsbug-log`.
 
-> **Note**: On Linux and Windows, `xsdb` supports an optional plug-in to allow for customizing output and control flow. Use the environment variable `XSBUG_LOGMACHINE` to set the path of a custom `LogMachine` class implementation (that extends `Machine`).  See `$MODDABLE/tools/xsbug-log/xsbug-machine.js` for the base class, and `$MODDABLE/tools/xsbug-log/xsbug-logmachine.js` for the default implementation.
+> **Note**: On Windows, `xsdb` supports an optional plug-in to allow for customizing output and control flow. Use the environment variable `XSBUG_LOGMACHINE` to set the path of a custom `LogMachine` class implementation (that extends `Machine`).  See `$MODDABLE/tools/xsbug-log/xsbug-machine.js` for the base class, and `$MODDABLE/tools/xsbug-log/xsbug-logmachine.js` for the default implementation.
 
 > **Note**: The `-dn` option is currently unsupported on Windows. It will be implemented in the near future.
 
@@ -363,7 +363,7 @@ xsdb is designed for three audiences:
 2. **Developers creating tools** and workflows that need to interact with an on-device debugger
 3. **Code generators**, such as LLMs, that need to inspect the device state during execution
 
-**Note**: On macOS, xsdb is built with the SDK tools (`cd $MODDABLE/build/makefiles/mac && make`) from `$MODDABLE/tools/xsdb`; it runs on XS and needs no Node.js. On Linux and Windows, xsdb is the Node implementation in `$MODDABLE/tools/xsbug-log`. Before running it the first time, you must execute `npm install`.
+**Note**: On macOS and Linux, xsdb is built with the SDK tools (`cd $MODDABLE/build/makefiles/mac && make`, or `lin`) from `$MODDABLE/tools/xsdb`; it runs on XS and needs no Node.js. On Windows, xsdb is the Node implementation in `$MODDABLE/tools/xsbug-log`. Before running it the first time, you must execute `npm install`.
 
 ```
 cd $MODDABLE/tools/xsbug-log
@@ -436,13 +436,13 @@ A successful launch is evaluated by the absence of an unhandled exception or Pro
 If an embedded project uses the network, test-examples waits for an IP address to be acquired before considering the application launched and beginning to count instrumentation logs.
 
 ### Running
-**Note**: test-examples is implemented using Node. Before running it for the first time, you must execute `npm install` in the `$MODDABLE/tools/test-examples` directory. On Linux and Windows, test-examples uses the Node implementation of xsdb (xsbug-log), so you must execute `npm install` on it too.
+**Note**: test-examples is implemented using Node. Before running it for the first time, you must execute `npm install` in the `$MODDABLE/tools/test-examples` directory. On Windows, test-examples uses the Node implementation of xsdb (xsbug-log), so you must execute `npm install` on it too.
 
 ```shell
 cd $MODDABLE/tools/test-examples
 npm install
 cd $MODDABLE/tools/xsbug-log
-npm install    # Linux and Windows only
+npm install    # Windows only
 ```
 
 To run test-examples:

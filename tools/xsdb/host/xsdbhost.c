@@ -19,14 +19,14 @@
  */
 
 /*
-	macOS host for xsdb: main(), the CFRunLoop, and the natives behind the "host" module.
-	Everything platform-specific about xsdb lives here; the JavaScript above it is portable.
+	POSIX host for xsdb: main() and the natives behind the "host" module. The run loop is supplied by
+	the platform file (mac/xsdbmac.c, lin/xsdblin.c) through xsdbWatch, xsdbUnwatch, and xsdbRunLoop.
 */
 
 #include "xsAll.h"
 #include "mc.xs.h"
+#include "xsdbhost.h"
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -35,6 +35,7 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <termios.h>
+#include <time.h>
 #include <unistd.h>
 
 extern char **environ;
@@ -54,8 +55,8 @@ static int gChildPipe[2] = {-1, -1};
 static xsMachine *gMachine = NULL;
 static xsSlot gStdinCallback;
 static xsSlot gChildCallback;
-static CFFileDescriptorRef gStdinDescriptor = NULL;
-static CFFileDescriptorRef gChildDescriptor = NULL;
+static int gStdinWatched = 0;
+static int gChildWatched = 0;
 
 /*
 	process lifetime
@@ -177,20 +178,27 @@ void xs_host_isTTY(xsMachine *the)
 	xsResult = xsBoolean(isatty(STDIN_FILENO));
 }
 
+void xs_host_platform(xsMachine *the)
+{
+	xsResult = xsString(xsdbPlatform);
+}
+
 /*
 	stdin as a run loop source: the callback receives an ArrayBuffer of bytes, or null at end of input
 */
 
-static void stdinCallback(CFFileDescriptorRef descriptor, CFOptionFlags callBackTypes, void *info)
+static void stdinCallback(int fd)
 {
 	char buffer[4096];
 	ssize_t count = read(STDIN_FILENO, buffer, sizeof(buffer));
 	if (count < 0) {
-		if ((EAGAIN == errno) || (EINTR == errno)) {
-			CFFileDescriptorEnableCallBacks(descriptor, kCFFileDescriptorReadCallBack);
+		if ((EAGAIN == errno) || (EINTR == errno))
 			return;
-		}
 		count = 0;
+	}
+	if (count <= 0) {
+		xsdbUnwatch(STDIN_FILENO);
+		gStdinWatched = 0;
 	}
 	xsBeginHost(gMachine);
 	{
@@ -202,16 +210,12 @@ static void stdinCallback(CFFileDescriptorRef descriptor, CFOptionFlags callBack
 		xsCallFunction1(gStdinCallback, xsUndefined, xsVar(0));
 	}
 	xsEndHost(gMachine);
-	if (count > 0)
-		CFFileDescriptorEnableCallBacks(descriptor, kCFFileDescriptorReadCallBack);
 }
 
 void xs_host_setStdin(xsMachine *the)
 {
-	CFRunLoopSourceRef source;
-
 	gMachine = the;
-	if (gStdinDescriptor) {
+	if (gStdinWatched) {
 		// replace the callback; the descriptor and its run loop source stay
 		xsForget(gStdinCallback);
 		gStdinCallback = xsArg(0);
@@ -221,11 +225,8 @@ void xs_host_setStdin(xsMachine *the)
 	gStdinCallback = xsArg(0);
 	xsRemember(gStdinCallback);
 
-	gStdinDescriptor = CFFileDescriptorCreate(kCFAllocatorDefault, STDIN_FILENO, false, stdinCallback, NULL);
-	source = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, gStdinDescriptor, 0);
-	CFRunLoopAddSource(CFRunLoopGetMain(), source, kCFRunLoopCommonModes);
-	CFRelease(source);
-	CFFileDescriptorEnableCallBacks(gStdinDescriptor, kCFFileDescriptorReadCallBack);
+	xsdbWatch(STDIN_FILENO, stdinCallback);
+	gStdinWatched = 1;
 }
 
 /*
@@ -236,12 +237,12 @@ static void onChildSignal(int signal)
 {
 	char byte = 0;
 	int error = errno;
-	if (gChildPipe[1] >= 0)
-		write(gChildPipe[1], &byte, 1);
+	if ((gChildPipe[1] >= 0) && (write(gChildPipe[1], &byte, 1) < 0))
+		; // nothing to do; the reaper runs on the next wakeup
 	errno = error;
 }
 
-static void childCallback(CFFileDescriptorRef descriptor, CFOptionFlags callBackTypes, void *info)
+static void childCallback(int fd)
 {
 	char drain[64];
 	pid_t pid;
@@ -265,16 +266,13 @@ static void childCallback(CFFileDescriptorRef descriptor, CFOptionFlags callBack
 		}
 		xsEndHost(gMachine);
 	}
-
-	CFFileDescriptorEnableCallBacks(descriptor, kCFFileDescriptorReadCallBack);
 }
 
 void xs_host_setChildExit(xsMachine *the)
 {
-	CFRunLoopSourceRef source;
 	struct sigaction action;
 
-	if (gChildDescriptor)
+	if (gChildWatched)
 		xsUnknownError("child exit callback already set");
 
 	gMachine = the;
@@ -286,11 +284,8 @@ void xs_host_setChildExit(xsMachine *the)
 	fcntl(gChildPipe[0], F_SETFL, fcntl(gChildPipe[0], F_GETFL) | O_NONBLOCK);
 	fcntl(gChildPipe[1], F_SETFL, fcntl(gChildPipe[1], F_GETFL) | O_NONBLOCK);
 
-	gChildDescriptor = CFFileDescriptorCreate(kCFAllocatorDefault, gChildPipe[0], false, childCallback, NULL);
-	source = CFFileDescriptorCreateRunLoopSource(kCFAllocatorDefault, gChildDescriptor, 0);
-	CFRunLoopAddSource(CFRunLoopGetMain(), source, kCFRunLoopCommonModes);
-	CFRelease(source);
-	CFFileDescriptorEnableCallBacks(gChildDescriptor, kCFFileDescriptorReadCallBack);
+	xsdbWatch(gChildPipe[0], childCallback);
+	gChildWatched = 1;
 
 	memset(&action, 0, sizeof(action));
 	action.sa_handler = onChildSignal;
@@ -363,6 +358,13 @@ void xs_host_kill(xsMachine *the)
 		untrackChild(pid);
 }
 
+static double now(void)
+{
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return ts.tv_sec + (ts.tv_nsec / 1e9);
+}
+
 typedef struct {
 	char *data;
 	size_t length;
@@ -396,7 +398,7 @@ void xs_host_execute(xsMachine *the)
 	struct pollfd descriptors[2];
 	int open = 2;
 	int timedOut = 0;
-	CFAbsoluteTime deadline = 0;
+	double deadline = 0;
 
 	if (xsToInteger(xsArgc) > 2)
 		timeout = xsToInteger(xsArg(2));
@@ -433,12 +435,12 @@ void xs_host_execute(xsMachine *the)
 	descriptors[1].fd = errPipe[0];
 	descriptors[1].events = POLLIN;
 	if (timeout >= 0)
-		deadline = CFAbsoluteTimeGetCurrent() + (timeout / 1000.0);
+		deadline = now() + (timeout / 1000.0);
 
 	while (open > 0) {
 		int remaining = -1, ready, i;
 		if (timeout >= 0) {
-			remaining = (int)((deadline - CFAbsoluteTimeGetCurrent()) * 1000);
+			remaining = (int)((deadline - now()) * 1000);
 			if (remaining <= 0) {
 				timedOut = 1;
 				break;
@@ -568,7 +570,7 @@ int main(int argc, char* argv[])
 	xsEndHost(machine);
 
 	if (!error)
-		CFRunLoopRun();
+		xsdbRunLoop();
 
 	xsDeleteMachine(machine);
 	return error;

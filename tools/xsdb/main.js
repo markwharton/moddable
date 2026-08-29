@@ -443,8 +443,17 @@ function onConnection(target) {
 	};
 }
 
-function launch() {
-	const listener = new Listener({ port: portIn });
+// the listener, or null when another process holds the port
+function listen() {
+	try {
+		return new Listener({ port: portIn });
+	}
+	catch (e) {
+		return null;
+	}
+}
+
+function launch(listener) {
 	listener.callback = function() {
 		onConnection(new Socket({ listener }));
 	};
@@ -500,27 +509,28 @@ function launch() {
 	}
 }
 
-// probe the port: a connection means another debugger holds it
-const probe = new Socket({ host: "127.0.0.1", port: portIn });
-probe.callback = function(message) {
-	if (Socket.connected === message) {
-		probe.close();
-		const rl = new LineEditor();
-		rl.start();
-		rl.question(`xsdb: Port ${portIn} is already in use (app or instance running).\nForcefully terminate the app holding the port? (y / n) `, (answer) => {
-			rl.close();
-			if (answer.trim().toLowerCase().startsWith('y')) {
-				Host.execute("sh", ["-c", `kill -9 $(lsof -t -i :${portIn})`], 5000);
-				Timer.set(launch, 500);
-			} else {
-				console.log('Exiting.');
-				Host.exit(-1);
-			}
-		});
-	}
-	else if (message < 0) {
-		// no debugger detected. continue.
-		probe.close();
-		launch();
-	}
-};
+let listener = listen();
+if (listener)
+	launch(listener);
+else {
+	const rl = new LineEditor();
+	rl.start();
+	rl.question(`xsdb: Port ${portIn} is already in use (app or instance running).\nForcefully terminate the app holding the port? (y / n) `, (answer) => {
+		rl.close();
+		if (answer.trim().toLowerCase().startsWith('y')) {
+			Host.execute("sh", ["-c", `kill -9 $(lsof -t -i :${portIn})`], 5000);
+			Timer.set(() => {
+				listener = listen();
+				if (listener)
+					launch(listener);
+				else {
+					console.log(`xsdb: Port ${portIn} is still in use. Exiting.`);
+					Host.exit(-1);
+				}
+			}, 500);
+		} else {
+			console.log('Exiting.');
+			Host.exit(-1);
+		}
+	});
+}

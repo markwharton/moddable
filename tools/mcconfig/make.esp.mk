@@ -22,7 +22,7 @@ HOST_OS := $(shell uname)
 ifeq ($(HOST_OS),Darwin)
 	XSDB = $(MODDABLE)/build/bin/mac/release/xsdb
 else
-	XSDB = node $(MODDABLE)/tools/xsbug-log/xsbug-log.js
+	XSDB = $(MODDABLE)/build/bin/lin/release/xsdb
 endif
 
 XS_GIT_VERSION ?= $(shell git -C $(MODDABLE) describe --tags --always --dirty 2>/dev/null)
