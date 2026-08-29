@@ -18,6 +18,11 @@
 #
 
 HOST_OS := $(shell uname)
+ifeq ($(HOST_OS),Darwin)
+	XSDB = $(MODDABLE)/build/bin/mac/release/xsdb
+else
+	XSDB = node $(MODDABLE)/tools/xsbug-log/xsbug-log.js
+endif
 
 UPLOAD_SPEED ?= 921600
 DEBUGGER_SPEED ?= 460800
@@ -570,7 +575,7 @@ ifeq ($(DEBUG),1)
 		endif
 
 		ifeq ("$(XSBUG_LAUNCH)","log")
-			DO_LAUNCH := export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && cd $(MODDABLE)/tools/xsbug-log && node xsbug-log $(LOG_LAUNCH)
+			DO_LAUNCH := export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && $(XSDB) $(LOG_LAUNCH)
 		endif
 
 	### Linux
@@ -589,7 +594,7 @@ ifeq ($(DEBUG),1)
 			LOG_LAUNCH = serial2xsbug $(SERIAL2XSBUG_PORT) $(DEBUGGER_SPEED) 8N1
 
 			ifeq ("$(XSBUG_LAUNCH)","log")
-				DO_LAUNCH := export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && cd $(MODDABLE)/tools/xsbug-log && node xsbug-log $(LOG_LAUNCH)
+				DO_LAUNCH := export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && $(XSDB) $(LOG_LAUNCH)
 			else
 				DO_LAUNCH = bash -c "XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) serial2xsbug $(SERIAL2XSBUG_PORT) $(DEBUGGER_SPEED) 8N1"
 			endif
@@ -614,7 +619,7 @@ ifeq ($(DEBUG),1)
 			ifeq ("$(XSBUG_LAUNCH)","log")
 				DO_LAUNCH = echo ; echo $(BEFORE_DEBUGGING_MESSAGE); echo ; \
 			 		XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) XSBUG_PROJECT=$(MAIN_DIR) \
-					cd $(MODDABLE)/tools/xsbug-log && node xsbug-log 	\
+					$(XSDB) 	\
 					 serial2xsbug `cat $(PORT_NAME_PATH)` $(DEBUGGER_SPEED) 8N1
 			endif
 		endif

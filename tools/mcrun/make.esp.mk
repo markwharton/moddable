@@ -19,6 +19,11 @@
 
 HOST_OS := $(shell uname)
 ifeq ($(HOST_OS),Darwin)
+	XSDB = $(MODDABLE)/build/bin/mac/release/xsdb
+else
+	XSDB = node $(MODDABLE)/tools/xsbug-log/xsbug-log.js
+endif
+ifeq ($(HOST_OS),Darwin)
 	VERS = $(shell sw_vers -productVersion | cut -f1 -d.)
 	ifeq ($(shell test $(VERS) -gt 10; echo $$?), 0)
 		UPLOAD_PORT ?= /dev/cu.usbserial-0001
@@ -67,7 +72,7 @@ ifeq ($(DEBUG),1)
 
 	ifeq ("$(XSBUG_LAUNCH)","log")
 		START_XSBUG =
-		DO_MOD_UPLOAD = export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && cd $(MODDABLE)/tools/xsbug-log && node xsbug-log $(SERIAL_CMD)
+		DO_MOD_UPLOAD = export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && $(XSDB) $(SERIAL_CMD)
 	endif
 endif
 

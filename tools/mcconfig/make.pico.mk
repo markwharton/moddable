@@ -18,6 +18,11 @@
 #
 
 HOST_OS := $(shell uname)
+ifeq ($(HOST_OS),Darwin)
+	XSDB = $(MODDABLE)/build/bin/mac/release/xsdb
+else
+	XSDB = node $(MODDABLE)/tools/xsbug-log/xsbug-log.js
+endif
 
 XS_GIT_VERSION ?= $(shell git -C $(MODDABLE) describe --tags --always --dirty 2> /dev/null)
 
@@ -87,7 +92,7 @@ ifeq ($(HOST_OS),Darwin)
 
 	ifeq ($(DEBUG),1)
 		ifeq ("$(XSBUG_LAUNCH)","log")
-			CONNECT_XSBUG=@echo "Connect to xsbug-log @ $(PICO_VID):$(PICO_PID)." && export XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && cd $(MODDABLE)/tools/xsbug-log && node xsbug-log serial2xsbug $(PICO_VID):$(PICO_PID) $(DEBUGGER_SPEED) 8N1
+			CONNECT_XSBUG=@echo "Connect to xsbug-log @ $(PICO_VID):$(PICO_PID)." && export XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && $(XSDB) serial2xsbug $(PICO_VID):$(PICO_PID) $(DEBUGGER_SPEED) 8N1
 		else
 			CONNECT_XSBUG=@echo "Connect to xsbug @ $(PICO_VID):$(PICO_PID)." ; export XSBUG_PORT=$(XSBUG_PORT) ; export XSBUG_HOST=$(XSBUG_HOST) ; serial2xsbug $(PICO_VID):$(PICO_PID) $(DEBUGGER_SPEED) 8N1
 			ifeq ("$(XSBUG_LAUNCH)","app")

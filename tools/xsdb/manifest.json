@@ -1,0 +1,62 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODDABLE)/modules/files/file/manifest.json",
+		{
+			"git": "https://github.com/markwharton/modxml.git",
+			"tag": "v0.1.1"
+		}
+	],
+	"modules": {
+		"*": [
+			"./main",
+			"./host",
+			"./protocol",
+			"./lineeditor",
+			"./machine",
+			"./debugmachine",
+			"./logmachine",
+			"./profile"
+		],
+		"~": [
+			"$(MODULES)/files/resource/*"
+		]
+	},
+	"preload": [
+		"host",
+		"protocol",
+		"lineeditor",
+		"profile"
+	],
+	"strip": [],
+	"platforms": {
+		"x-cli-mac": {
+			"modules": {
+				"*": [
+					"./mac/xsdb",
+					"$(MODULES)/network/socket/*",
+					"$(MODULES)/network/socket/mac/*",
+					"$(MODULES)/base/timer/timer",
+					"$(MODULES)/base/timer/modTimer",
+					"$(MODULES)/base/timer/mac/*",
+					"$(MODULES)/base/time/*",
+					"$(MODULES)/base/time/mac/*"
+				]
+			},
+			"preload": [
+				"socket",
+				"timer",
+				"time"
+			]
+		},
+		"x-cli-lin": {
+			"error": "xsdb is not yet ported to Linux; use tools/xsbug-log"
+		},
+		"x-cli-win": {
+			"error": "xsdb is not yet ported to Windows; use tools/xsbug-log"
+		},
+		"...": {
+			"error": "build xsdb with -p x-cli-mac"
+		}
+	}
+}

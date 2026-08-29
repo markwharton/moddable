@@ -18,6 +18,11 @@
 #
 
 HOST_OS := $(shell uname)
+ifeq ($(HOST_OS),Darwin)
+	XSDB = $(MODDABLE)/build/bin/mac/release/xsdb
+else
+	XSDB = node $(MODDABLE)/tools/xsbug-log/xsbug-log.js
+endif
 HOST_CPU := $(shell uname -m)
 
 XS_GIT_VERSION ?= $(shell git -C $(MODDABLE) describe --tags --always --dirty 2> /dev/null)
@@ -80,7 +85,7 @@ ifeq ($(HOST_OS),Darwin)
 	UF2_VOLUME_PATH = /Volumes/$(UF2_VOLUME_NAME)
 
 	SET_PROGRAMMING_MODE = $(PLATFORM_DIR)/config/programmingMode $(M4_VID) $(M4_PID) $(UF2_VOLUME_PATH)
-	START_NODE = cd $(MODDABLE)/tools/xsbug-log && XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) XSBUG_PROJECT=$(MAIN_DIR) node xsbug-log
+	START_NODE = XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) XSBUG_PROJECT=$(MAIN_DIR) $(XSDB)
 
 	ifeq ($(USE_USB),1)
 		START_SERIAL2XSBUG = serial2xsbug $(M4_VID):$(M4_PID) 921600 8N1
@@ -133,7 +138,7 @@ else
 		else
 			# not usb
 			ifeq ($(XSBUG_LOG),1)
-				CONNECT_XSBUG = XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) XSBUG_PROJECT=$(MAIN_DIR) cd $(MODDABLE)/tools/xsbug-log && node xsbug-log $(MODDABLE_TOOLS_DIR)/serial2xsbug $(DEBUGGER_PORT) $(DEBUGGER_SPEED) 8N1
+				CONNECT_XSBUG = XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) XSBUG_PROJECT=$(MAIN_DIR) $(XSDB) $(MODDABLE_TOOLS_DIR)/serial2xsbug $(DEBUGGER_PORT) $(DEBUGGER_SPEED) 8N1
 			else
 				CONNECT_XSBUG = XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) $(MODDABLE_TOOLS_DIR)/serial2xsbug $(DEBUGGER_PORT) $(DEBUGGER_SPEED) 8N1
 			endif

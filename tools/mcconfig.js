@@ -1513,9 +1513,11 @@ export default class extends Tool {
 							start_xsbug_cmd = `env XSBUG_PROJECT=${this.mainPath} ${this.buildPath}/devices/zephyr/config/lin_start_xsbug && `;
 					}
 					
+					const xsdb = (this.currentPlatform === "mac") ? `${this.moddablePath}/build/bin/mac/release/xsdb` : `node ${this.moddablePath}/tools/xsbug-log/xsbug-log.js`;
+					
 					let debugger_cmd = `serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
 					if (this.xsbugLaunch === "log") {
-						debugger_cmd = `export XSBUG_LOG_PORT=${this.environment.XSBUG_LOG_PORT || 5002} && export XSBUG_PORT=${this.environment.XSBUG_PORT || 5002} && export XSBUG_HOST=${this.environment.XSBUG_HOST || "localhost"} && export XSBUG_PROJECT=${this.mainPath} && cd ${this.moddablePath}/tools/xsbug-log && node xsbug-log serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
+						debugger_cmd = `export XSBUG_LOG_PORT=${this.environment.XSBUG_LOG_PORT || 5002} && export XSBUG_PORT=${this.environment.XSBUG_PORT || 5002} && export XSBUG_HOST=${this.environment.XSBUG_HOST || "localhost"} && export XSBUG_PROJECT=${this.mainPath} && ${xsdb} serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
 					}
 					command += start_xsbug_cmd + debugger_cmd;
 				}
@@ -1530,7 +1532,7 @@ export default class extends Tool {
 					else if (this.buildTarget == "all" || undefined === this.buildTarget) { 					/* all */
 						let debugger_cmd = `serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
 						if (this.xsbugLaunch === "log") {
-							debugger_cmd = `export XSBUG_LOG_PORT=${this.environment.XSBUG_LOG_PORT || 5002} && export XSBUG_PORT=${this.environment.XSBUG_PORT || 5002} && export XSBUG_HOST=${this.environment.XSBUG_HOST || "localhost"} && export XSBUG_PROJECT=${this.mainPath} && cd ${this.moddablePath}/tools/xsbug-log && node xsbug-log serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
+							debugger_cmd = `export XSBUG_LOG_PORT=${this.environment.XSBUG_LOG_PORT || 5002} && export XSBUG_PORT=${this.environment.XSBUG_PORT || 5002} && export XSBUG_HOST=${this.environment.XSBUG_HOST || "localhost"} && export XSBUG_PROJECT=${this.mainPath} && ${xsdb} serial2xsbug ${this.environment.DEBUGGER_PORT} ${this.environment.DEBUGGER_SPEED} 8N1`;
 						}
 						secondary = `${path} -d ${this.tmpPath}${this.slash}build -- -DEXTRA_CONF_FILE=${this.tmpPath}${this.slash}zephyr.conf -DMODDABLE_BUILD_DIR=${this.tmpPath} ${overlay} && west -z ${this.environment.ZEPHYR_BASE} flash -d ${this.tmpPath}${this.slash}build ${flashRunner} && ${debugger_cmd}`;
 					}
