@@ -62,6 +62,16 @@
 				}
 			}
 		},
+		"x-cli-win": {
+			"modules": {
+				"*": "$(MODULES)/files/file/win/*"
+			},
+			"config": {
+				"file": {
+					"root": "./"
+				}
+			}
+		},
 		"lin": {
 			"modules": {
 				"*": "$(MODULES)/files/file/lin/*"

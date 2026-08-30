@@ -38,15 +38,18 @@ export class Host {
 	static kill(pid, signal) @ "xs_host_kill";
 	static execute(path, args, timeout) @ "xs_host_execute";	// blocks; { status, stdout, stderr }
 
-	static get platform() @ "xs_host_platform";		// "mac" | "lin"
+	static get platform() @ "xs_host_platform";		// "mac" | "lin" | "win"
 
 	static join(...parts) {
 		return parts.filter(part => part !== undefined && part !== "").join("/").replaceAll(/\/+/g, "/");
 	}
 
-	// absolute path for input, resolved against the working directory, with "." and ".." removed
+	// absolute path for input, resolved against the working directory, with "." and ".." removed;
+	// forward slashes throughout, which Windows accepts too
 	static resolve(input) {
-		let path = input.startsWith("/") ? input : Host.join(Host.cwd(), input);
+		input = input.replaceAll("\\", "/");
+		const drive = /^[A-Za-z]:/.exec(input)?.[0] ?? "";
+		let path = (input.startsWith("/") || drive) ? input.slice(drive.length) : Host.join(Host.cwd().replaceAll("\\", "/"), input);
 		const result = [];
 		for (const part of path.split("/")) {
 			if ((part === "") || (part === "."))
@@ -56,7 +59,7 @@ export class Host {
 			else
 				result.push(part);
 		}
-		return "/" + result.join("/");
+		return drive + "/" + result.join("/");
 	}
 }
 

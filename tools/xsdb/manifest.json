@@ -71,10 +71,26 @@
 			]
 		},
 		"x-cli-win": {
-			"error": "xsdb is not yet ported to Windows; use tools/xsbug-log"
+			"modules": {
+				"*": [
+					"./win/*",
+					"$(MODULES)/network/socket/*",
+					"$(MODULES)/network/socket/win/*",
+					"$(MODULES)/base/timer/timer",
+					"$(MODULES)/base/timer/modTimer",
+					"$(MODULES)/base/timer/win/*",
+					"$(MODULES)/base/time/*",
+					"$(MODULES)/base/time/win/*"
+				]
+			},
+			"preload": [
+				"socket",
+				"timer",
+				"time"
+			]
 		},
 		"...": {
-			"error": "build xsdb with -p x-cli-mac or -p x-cli-lin"
+			"error": "build xsdb with -p x-cli-mac, -p x-cli-lin, or -p x-cli-win"
 		}
 	}
 }
