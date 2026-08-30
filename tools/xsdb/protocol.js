@@ -20,8 +20,8 @@
 
 /*
 	The xsbug wire protocol, debuggee to debugger: a stream of "\r\n<xsbug>...</xsbug>\r\n" documents,
-	each arriving in pieces of arbitrary size. Framer collects the bytes, cuts one document at a time
-	at its terminator, parses it with modxml, and replays the tree into the Machine's SAX-style
+	each arriving in pieces of arbitrary size. Framer keeps the pieces, cuts one document at a time
+	at its terminator (copying each byte once), parses it with modxml, and replays the tree into the Machine's SAX-style
 	callbacks (onStartElement, onCharacterData, onEndElement) so the Machine is unchanged from the
 	streaming-parser days.
 */
@@ -32,49 +32,56 @@ const terminator = new Uint8Array(ArrayBuffer.fromString("</xsbug>\r\n"));
 
 export class Framer {
 	#machine;
-	#buffer = new Uint8Array(0);
+	#chunks = [];		// the pieces of the message in progress, each copied once into the final buffer
+	#length = 0;
+	#tail = new Uint8Array(0);	// the last bytes of the pending data, so a terminator split across reads is found
 
 	constructor(machine) {
 		this.#machine = machine;
 	}
 
 	write(bytes) {
-		const chunk = new Uint8Array(bytes);
-		const scanFrom = Math.max(0, this.#buffer.length - terminator.length + 1);
-		const joined = new Uint8Array(this.#buffer.length + chunk.length);
-		joined.set(this.#buffer);
-		joined.set(chunk, this.#buffer.length);
-		this.#buffer = joined;
-
-		let start = 0;
-		let end = this.#find(scanFrom);
-		while (end >= 0) {
-			const message = String.fromArrayBuffer(this.#buffer.slice(start, end + terminator.length).buffer);
-			this.#deliver(message);
-			start = end + terminator.length;
-			end = this.#find(start);
-		}
-		if (start > 0)
-			this.#buffer = this.#buffer.slice(start);
-	}
-
-	// index of the next terminator at or after from, or -1
-	#find(from) {
-		const buffer = this.#buffer;
-		const last = buffer.length - terminator.length;
-		outer: for (let i = from; i <= last; i++) {
-			if (buffer[i] !== terminator[0])
-				continue;
-			for (let j = 1; j < terminator.length; j++) {
-				if (buffer[i + j] !== terminator[j])
-					continue outer;
+		let chunk = new Uint8Array(bytes);
+		while (chunk.length) {
+			const carry = this.#tail;
+			const window = new Uint8Array(carry.length + chunk.length);
+			window.set(carry);
+			window.set(chunk, carry.length);
+			const hit = find(window);
+			if (hit < 0) {
+				this.#push(chunk);
+				this.#tail = window.slice(Math.max(0, window.length - (terminator.length - 1)));
+				return;
 			}
-			return i;
+			// the terminator starts at hit in window; carry is shorter than the terminator, so it ends inside chunk
+			const end = hit + terminator.length - carry.length;
+			this.#push(chunk.subarray(0, end));
+			this.#deliver(this.#take());
+			this.#tail = new Uint8Array(0);
+			chunk = chunk.subarray(end);
 		}
-		return -1;
 	}
 
-	#deliver(message) {
+	#push(chunk) {
+		this.#chunks.push(chunk);
+		this.#length += chunk.length;
+	}
+
+	// the pending chunks as one buffer, and reset
+	#take() {
+		const buffer = new Uint8Array(this.#length);
+		let offset = 0;
+		for (const chunk of this.#chunks) {
+			buffer.set(chunk, offset);
+			offset += chunk.length;
+		}
+		this.#chunks = [];
+		this.#length = 0;
+		return buffer;
+	}
+
+	#deliver(bytes) {
+		const message = String.fromArrayBuffer(bytes.buffer);
 		let document;
 		try {
 			document = XML.parse(message, false);
@@ -85,6 +92,21 @@ export class Framer {
 		}
 		replay(document, this.#machine);
 	}
+}
+
+// index of the terminator in buffer, or -1
+function find(buffer) {
+	const last = buffer.length - terminator.length;
+	outer: for (let i = 0; i <= last; i++) {
+		if (buffer[i] !== terminator[0])
+			continue;
+		for (let j = 1; j < terminator.length; j++) {
+			if (buffer[i + j] !== terminator[j])
+				continue outer;
+		}
+		return i;
+	}
+	return -1;
 }
 
 // walk a modxml tree in document order, firing the SAX-style callbacks
