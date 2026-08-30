@@ -32,6 +32,12 @@ jobs:
           - os: windows-latest
             platform: win
             bin: build/bin/win/release/xsdb.exe
+          - os: ubuntu-24.04-arm
+            platform: lin
+            bin: build/bin/lin/release/xsdb
+          - os: windows-11-arm
+            platform: win
+            bin: build/bin/win/release/xsdb.exe
     runs-on: ${{ matrix.os }}
     env:
       MODDABLE: ${{ github.workspace }}
