@@ -29,7 +29,7 @@ KILL_SERIAL2XSBUG =
 KILL_SIMULATOR =
 ifeq ($(DEBUG),1)
 	ifeq ("$(XSBUG_LAUNCH)","log")
-#		START_SIMULATOR = export DISPLAY=:0.0 && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && cd $(MODDABLE)/tools/xsbug-log && node xsbug-log $(SIMULATOR) $(SIMULATORS) $(BIN_DIR)/mc.so
+#		START_SIMULATOR = export DISPLAY=:0.0 && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && $(MODDABLE)/build/bin/lin/release/xsdb $(SIMULATOR) $(SIMULATORS) $(BIN_DIR)/mc.so
 		START_SIMULATOR = export DISPLAY=:2.0 && export XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && $(MODDABLE)/build/bin/lin/release/xsdb $(SIMULATOR) $(SIMULATORS) $(BIN_DIR)/mc.so
 	else
 		ifeq ("$(XSBUG_LAUNCH)","app")

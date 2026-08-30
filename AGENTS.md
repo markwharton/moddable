@@ -123,7 +123,6 @@ Instead, drive the session explicitly: run under xsdb and issue `quit` when you 
 xsdb is a command line JavaScript debugger modeled on gdb, working against both devices and the simulator. Its documentation names three intended audiences, the third being "code generators, such as LLMs" — so it is the tool to reach for here rather than adding `trace()` calls and rebuilding.
 
 ```shell
-cd $MODDABLE/tools/xsbug-log && npm install               # first time only; xsdb is implemented in Node
 cd $MODDABLE/examples/piu/balls && mcconfig -dl -m -p sim
 ```
 

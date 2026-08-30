@@ -130,7 +130,7 @@ else
 	ifeq ($(DEBUG),1)
 		ifeq ($(USE_USB),1)
 			ifeq ("$(XSBUG_LAUNCH)","log")
-				CONNECT_XSBUG = @echo "Connect to xsbug-log @ $(M4_VID):$(M4_PID)." && XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) $(PLATFORM_DIR)/config/connectToXsbugLinux $(M4_VID) $(M4_PID) 1
+				CONNECT_XSBUG = @echo "Connect to xsdb @ $(M4_VID):$(M4_PID)." && XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) $(PLATFORM_DIR)/config/connectToXsbugLinux $(M4_VID) $(M4_PID) 1
 			else
 				CONNECT_XSBUG = @echo "Connect to xsbug @ $(M4_VID):$(M4_PID)." && XSBUG_PORT=$(XSBUG_PORT) XSBUG_HOST=$(XSBUG_HOST) $(PLATFORM_DIR)/config/connectToXsbugLinux $(M4_VID) $(M4_PID)
 			endif

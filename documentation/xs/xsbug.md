@@ -1,11 +1,11 @@
 # xsbug
-Updated October 2, 2023
+Updated August 30, 2026
 
 The `xsbug` JavaScript source level debugger is a full featured debugger that supports debugging modules and applications for [XS platforms](../xs/XS%20Platforms.md). The `xsbug` debugger is automatically launched when deploying debug builds and connects to devices via USB or over Wi-Fi. Similar to other debuggers, `xsbug` supports setting breakpoints and browsing source code, the call stack, local variables, and global variables. The `xsbug` debugger additionally provides real-time instrumentation to track memory usage and profile application and resource consumption. There is also an integrated [performance profiler](#profiler) for identifying performance hot-spots.
 
 A video demonstration of xsbug is available [here](https://youtu.be/vqu8gDV7AOo).
 
-> Note: For developers who prefer to use a console log for debugging, xsbug-log maybe used instead of xsbug. See [below](#xsbug-log) for details.
+> Note: For developers who prefer to use a console log for debugging, xsdb may be used instead of xsbug. See [below](#xsdb) for details.
 
 ## Machine Tabs
 
@@ -152,19 +152,12 @@ trace('starts with the tag\n');
 xsbug may be used to run tests262 and unit tests, such as [those included](../../tests) in the Moddable SDK,  See the [Testing the Moddable SDK](../tools/testing.md) document for instructions on using xsbug for testing.
 
 
-<a id="xsbug-log"></a>
-## xsbug-log
+<a id="xsdb"></a>
+## xsdb
 
-xsbug-log is an alternative to xsbug. Instead of a graphical user interface, it is a simple console log of the project's output. xsbug-log useful when running on devices without a display (so-called "headless" devices) and for developers who prefer debugging with only console output.
+xsdb is an alternative to xsbug: a command line debugger, modeled on gdb, that also serves as a console log of the project's output. It is useful when running on devices without a display (so-called "headless" devices), for developers who prefer debugging with only console output, and for scripts. It is built with the SDK tools; see [xsdb](../tools/tools.md#xsdb) in the tools documentation.
 
-xsbug-log is implemented in Node.js. To use it, you must first install the dependencies:
-
-```shell
-cd $MODDABLE/tools/xsbug-log
-npm install
-```
-
-To use xsbug-log with `mcconfig` use `-dl` (for debug log) in place of`-d` on the command line.
+To use xsdb with `mcconfig` use `-dl` (for debug log) in place of `-d` on the command line.
 
 ```shell
 mcconfig -dl -m -p esp32/moddable_two

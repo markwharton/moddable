@@ -353,7 +353,6 @@ function runTest(examplePath) {
                      require('child_process').execSync('killall -9 xsl 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
                      require('child_process').execSync('killall -9 serial2xsbug 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
                      require('child_process').execSync('pkill -9 -f serial2xsbug 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
-                     require('child_process').execSync('pkill -9 -f xsbug-log 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
                      require('child_process').execSync('pkill -9 -f xsdb 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
                 } catch {}
                 
@@ -556,7 +555,6 @@ async function main() {
         
         try { 
             require('child_process').execSync('killall -9 mcsim 2>/dev/null', { stdio: 'ignore', timeout: 2000 }); 
-            require('child_process').execSync('pkill -9 -f xsbug-log 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
             require('child_process').execSync('pkill -9 -f xsdb 2>/dev/null', { stdio: 'ignore', timeout: 2000 });
         } catch {}
 

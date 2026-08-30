@@ -31,7 +31,7 @@ class LogMachine extends Machine {
 		super.onTitleChanged(title, tag);
 		
 		if (title && (title !== "mcsim"))
-			console.log(`#xsbug-log connected to "${title}"`);
+			console.log(`#xsdb connected to "${title}"`);
 
 		this.doSetAllBreakpoint([], false, true);		// break on exceptions
 	}
@@ -48,7 +48,7 @@ class LogMachine extends Machine {
 				else if (payload.startsWith("@close")) {
 					if (this.binaryOutput) {
 						this.binaryOutput.close();
-						console.log(`#xsbug-log capture: ${this.binaryPath}`);
+						console.log(`#xsdb capture: ${this.binaryPath}`);
 					}
 					delete this.binaryOutput;
 					delete this.binaryName;

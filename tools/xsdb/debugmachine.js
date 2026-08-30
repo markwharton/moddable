@@ -357,7 +357,7 @@ class DebugMachine extends Machine {
 	// --- Output helpers ---
 
 	clearLine() {
-		// Implemented dynamically via Router in xsbug-log.js
+		// Implemented dynamically via the router in main.js
 	}
 
 	showPrompt() {
@@ -635,7 +635,7 @@ class DebugMachine extends Machine {
 				else if (payload.startsWith("@close")) {
 					if (this.binaryOutput) {
 						this.binaryOutput.close();
-						this.print(`#xsbug-log capture: ${this.binaryPath}`);
+						this.print(`#xsdb capture: ${this.binaryPath}`);
 					}
 					delete this.binaryOutput;
 					delete this.binaryName;

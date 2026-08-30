@@ -92,7 +92,7 @@ ifeq ($(HOST_OS),Darwin)
 
 	ifeq ($(DEBUG),1)
 		ifeq ("$(XSBUG_LAUNCH)","log")
-			CONNECT_XSBUG=@echo "Connect to xsbug-log @ $(PICO_VID):$(PICO_PID)." && export XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && $(XSDB) serial2xsbug $(PICO_VID):$(PICO_PID) $(DEBUGGER_SPEED) 8N1
+			CONNECT_XSBUG=@echo "Connect to xsdb @ $(PICO_VID):$(PICO_PID)." && export XSBUG_LOG_PORT=$(XSBUG_LOG_PORT) && export XSBUG_PORT=$(XSBUG_PORT) && export XSBUG_HOST=$(XSBUG_HOST) && export XSBUG_PROJECT=$(MAIN_DIR) && $(XSDB) serial2xsbug $(PICO_VID):$(PICO_PID) $(DEBUGGER_SPEED) 8N1
 		else
 			CONNECT_XSBUG=@echo "Connect to xsbug @ $(PICO_VID):$(PICO_PID)." ; export XSBUG_PORT=$(XSBUG_PORT) ; export XSBUG_HOST=$(XSBUG_HOST) ; serial2xsbug $(PICO_VID):$(PICO_PID) $(DEBUGGER_SPEED) 8N1
 			ifeq ("$(XSBUG_LAUNCH)","app")
@@ -118,7 +118,7 @@ else
 
 	ifeq ($(DEBUG),1)
 		ifeq ("$(XSBUG_LAUNCH)","log")
-			CONNECT_XSBUG = @echo "Connect to xsbug-log @ $(PICO_VID):$(PICO_PID)." && export XSBUG_PROJECT=$(MAIN_DIR) && PATH=$(PLATFORM_DIR)/config:$(PATH) ; $(PLATFORM_DIR)/config/connectToXsbugLinux $(PICO_VID) $(PICO_PID) 1
+			CONNECT_XSBUG = @echo "Connect to xsdb @ $(PICO_VID):$(PICO_PID)." && export XSBUG_PROJECT=$(MAIN_DIR) && PATH=$(PLATFORM_DIR)/config:$(PATH) ; $(PLATFORM_DIR)/config/connectToXsbugLinux $(PICO_VID) $(PICO_PID) 1
 		else
 			CONNECT_XSBUG = @echo "Connect to xsbug @ $(PICO_VID):$(PICO_PID)." && PATH=$(PLATFORM_DIR)/config:$(PATH) ; $(PLATFORM_DIR)/config/connectToXsbugLinux $(PICO_VID) $(PICO_PID)
 		endif

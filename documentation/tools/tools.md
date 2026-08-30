@@ -87,7 +87,7 @@ mcconfig [manifest] [-d] [-f format] [-i] [-m] [-o directory] [-p platform] [-r 
 
 > **Note**: `-dl` runs the `xsdb` binary built with the SDK tools; no Node.js is required.
 
-> **Note**: The Node.js implementation in `$MODDABLE/tools/xsbug-log` supported an `XSBUG_LOGMACHINE` plug-in for custom output. The XS implementation does not; customize `$MODDABLE/tools/xsdb/debugmachine.js` instead.
+> **Note**: Earlier, Node.js-based releases of `xsdb` supported an `XSBUG_LOGMACHINE` plug-in for custom output. The XS implementation does not; customize `$MODDABLE/tools/xsdb/debugmachine.js` instead.
 
 > **Note**: The `-dn` option is currently unsupported on Windows. It will be implemented in the near future.
 
