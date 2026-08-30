@@ -18,6 +18,12 @@
  *
  */
 
+/*
+	The minimal machine: prints the log and the frames at a break, takes no commands. Selected with
+	XSDB_MACHINE=log; the starting point for a custom machine. If nobody needs it, delete this file
+	and its line in manifest.json and main.js.
+*/
+
 import { Machine } from "machine";
 import { File } from "file";
 import Host from "host";

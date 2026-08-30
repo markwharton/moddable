@@ -29,8 +29,12 @@ import { File } from "file";
 import Timer from "timer";
 import Host from "host";
 import { LineEditor } from "lineeditor";
-import { Machine } from "machine";
-import { LogMachine } from "debugmachine";
+import { Machine as BaseMachine } from "machine";
+import { DebugMachine } from "debugmachine";
+import { LogMachine } from "logmachine";
+
+// XSDB_MACHINE=log selects the minimal log-only machine (logmachine.js) instead of the debugger
+const Machine = (Host.getenv("XSDB_MACHINE") === "log") ? LogMachine : DebugMachine;
 
 globalThis.console = {
 	log(...args) {
@@ -258,15 +262,19 @@ const xsdbRouter = {
 			}
 
 			if (str === 'quit' || str === 'q') {
-				if (active)
+				if (active?.handleCommand)
 					active.handleCommand(str);
-				else
+				else {
+					if (active?.connected) active.doAbort();
 					Host.exit(0);
+				}
 				return;
 			}
 
-			if (active)
+			if (active?.handleCommand)
 				active.handleCommand(str);
+			else if (active)
+				console.log('The log machine takes no commands (XSDB_MACHINE=log). Type "quit" to exit.');
 			else {
 				console.log('No active connection. Waiting for device...');
 				this.rl.prompt(true);
@@ -303,7 +311,7 @@ const xsdbRouter = {
 	addMachine(target) {
 		if (!this.rl) this.init();
 
-		const m = new LogMachine(target);
+		const m = new Machine(target);
 
 		// Map router extensions cleanly into the Machine so it interfaces with the global rl natively.
 		m.rl = this.rl;
@@ -323,9 +331,9 @@ const xsdbRouter = {
 		};
 
 		// Broadcast breakpoint changes to all connected machines.
-		const baseDoSetBreakpoint = Machine.prototype.doSetBreakpoint;
-		const baseDoClearBreakpoint = Machine.prototype.doClearBreakpoint;
-		const baseDoClearAllBreakpoints = Machine.prototype.doClearAllBreakpoints;
+		const baseDoSetBreakpoint = BaseMachine.prototype.doSetBreakpoint;
+		const baseDoClearBreakpoint = BaseMachine.prototype.doClearBreakpoint;
+		const baseDoClearAllBreakpoints = BaseMachine.prototype.doClearAllBreakpoints;
 
 		m.doSetBreakpoint = (path, line, options) => {
 			this.machines.forEach(mach => {
@@ -352,8 +360,8 @@ const xsdbRouter = {
 		m.exceptionsMode = this.globalExceptionsMode;
 		m.breakOnStart = this.globalBreakOnStart;
 		m.timestamps = this.globalTimestamps;
-		const originalCmdSet = m.cmdSet.bind(m);
-		m.cmdSet = (args) => {
+		const originalCmdSet = m.cmdSet?.bind(m);
+		if (originalCmdSet) m.cmdSet = (args) => {
 			originalCmdSet(args);
 			let save = false;
 			if (args[0] === 'output') { this.globalOutputFormat = m.outputFormat; save = true; }
@@ -374,6 +382,7 @@ const xsdbRouter = {
 		};
 
 		for (const name of ['cmdBreak', 'cmdClear', 'cmdDelete', 'cmdCondition', 'cmdTrace', 'cmdHitcount']) {
+			if (!m[name]) continue;
 			const original = m[name].bind(m);
 			m[name] = (args) => {
 				original(args);
