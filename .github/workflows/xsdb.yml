@@ -46,6 +46,10 @@ jobs:
           token: ${{ secrets.MODXML_TOKEN || github.token }}
           path: build/tmp/${{ matrix.platform }}/release/xsdb/repos/github.com/markwharton/modxml/v0.1.1
 
+      - name: SDK tools on PATH
+        shell: bash
+        run: echo "$MODDABLE/build/bin/${{ matrix.platform }}/release" >> "$GITHUB_PATH"
+
       - name: Linux packages
         if: matrix.platform == 'lin'
         run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
@@ -71,6 +75,4 @@ jobs:
 
       - name: Smoke test
         shell: bash
-        run: |
-          export PATH="$MODDABLE/build/bin/${{ matrix.platform }}/release:$PATH"
-          python3 tools/xsdb/test/fakedebuggee.py "${{ matrix.bin }}"
+        run: python3 tools/xsdb/test/fakedebuggee.py "${{ matrix.bin }}"
