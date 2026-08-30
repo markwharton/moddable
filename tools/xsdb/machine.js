@@ -356,7 +356,7 @@ class Machine {
 	}
 	onInstrumentValues(values) {
 		this.instruments.forEach((instrument, index) => { instrument.value = values[index]; });
-    	this.#eventListeners.instruments.forEach(listener => listener.call(null, this.instruments));
+	this.#eventListeners.instruments.forEach(listener => listener.call(null, this.instruments));
 	}
 	onLogged(path, line, text) {
 	}
@@ -379,7 +379,7 @@ class Machine {
 		else if (name == "stop") {
 			this.profile.stop(parseInt(value.slice(1), 16));
 			this.profiling = false;
-    		this.#eventListeners.profile.forEach(listener => listener.call(null, this.profile));
+		this.#eventListeners.profile.forEach(listener => listener.call(null, this.profile));
 		}
 	}
 	onTitleChanged(title, tag) {
