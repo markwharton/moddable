@@ -38,7 +38,11 @@ globalThis.console = {
 	}
 };
 
-const portIn = parseInt(Host.getenv("XSBUG_LOG_PORT") ?? "5002");
+const portIn = Number.parseInt(Host.getenv("XSBUG_LOG_PORT") || "5002");
+if (!(portIn > 0 && portIn < 65536)) {
+	console.log(`xsdb: XSBUG_LOG_PORT is "${Host.getenv("XSBUG_LOG_PORT")}", not a port number. Exiting.`);
+	Host.exit(1);
+}
 let connections = 0;
 let autoexit = false;
 let child = null;
@@ -518,7 +522,15 @@ else {
 	rl.question(`xsdb: Port ${portIn} is already in use (app or instance running).\nForcefully terminate the app holding the port? (y / n) `, (answer) => {
 		rl.close();
 		if (answer.trim().toLowerCase().startsWith('y')) {
-			Host.execute("sh", ["-c", `kill -9 $(lsof -t -i :${portIn})`], 5000);
+			try {
+				if (Host.platform === "win")
+					Host.execute("cmd", ["/c", `FOR /F "tokens=5" %P IN ('netstat -ano ^| findstr :${portIn}') DO taskkill /PID %P /F`], 5000);
+				else
+					Host.execute("sh", ["-c", `kill -9 $(lsof -t -i :${portIn})`], 5000);
+			}
+			catch (e) {
+				console.log(`xsdb: could not stop the process holding port ${portIn}: ${e.message}`);
+			}
 			Timer.set(() => {
 				listener = listen();
 				if (listener)

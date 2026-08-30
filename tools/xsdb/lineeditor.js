@@ -44,6 +44,7 @@ export class LineEditor {
 	#postHistory;
 	#question;
 	#tty = true;
+	#afterCR = false;
 
 	onLine = line => {};
 	onClose = () => {};
@@ -119,18 +120,31 @@ export class LineEditor {
 	}
 
 	#byte(c) {
+		// "\r\n" is one Enter
+		const afterCR = this.#afterCR;
+		this.#afterCR = (c === 13);
+		if ((c === 10) && afterCR)
+			return;
+
 		if (this.#escape) {
-			this.#escape += String.fromCharCode(c);
-			if (this.#escape === "\x1B[") {
+			const sequence = this.#escape + String.fromCharCode(c);
+			if (this.#escape === "\x1B") {
+				if ((c === 0x5B) || (c === 0x4F)) {		// CSI "ESC [" or SS3 "ESC O"
+					this.#escape = sequence;
+					return;
+				}
+				this.#escape = "";				// a lone ESC: drop it, handle this byte normally
+			}
+			else {
+				// wait for the final byte of a CSI sequence (parameters are digits and semicolons)
+				if (sequence.startsWith("\x1B[") && (c >= 0x30) && (c <= 0x3F)) {
+					this.#escape = sequence;
+					return;
+				}
+				this.#escape = "";
+				this.#escapeSequence(sequence.replace("\x1BO", "\x1B["));	// SS3 keys map onto their CSI forms
 				return;
 			}
-			const sequence = this.#escape;
-			// wait for the final byte of a CSI sequence (parameters are digits and semicolons)
-			if (sequence.startsWith("\x1B[") && (c >= 0x30) && (c <= 0x3F))
-				return;
-			this.#escape = "";
-			this.#escapeSequence(sequence);
-			return;
 		}
 
 		if (c >= 0x80) {

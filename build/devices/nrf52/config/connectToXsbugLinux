@@ -13,6 +13,6 @@ if [[ "$3" == "" ]]
 then
 	${MODDABLE}/build/bin/lin/release/serial2xsbug ${port} 921600 8N1
 else
-	cd ${MODDABLE}/tools/xsbug-log && node xsbug-log ${MODDABLE}/build/bin/lin/release/serial2xsbug ${port} 921600 8N1
+	${MODDABLE}/build/bin/lin/release/xsdb ${MODDABLE}/build/bin/lin/release/serial2xsbug ${port} 921600 8N1
 fi
 

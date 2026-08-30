@@ -44,8 +44,10 @@ const char *xsdbPlatform = "lin";
 static gboolean descriptorCallback(gint fd, GIOCondition condition, gpointer data)
 {
 	xsdbWatchRecord *watch = data;
+	guint source = watch->source;
 	watch->callback(watch->fd);
-	return watch->source ? G_SOURCE_CONTINUE : G_SOURCE_REMOVE;
+	// continue only if this record still belongs to this source (the callback may have unwatched it, or unwatched and re-used it)
+	return (watch->source == source) ? G_SOURCE_CONTINUE : G_SOURCE_REMOVE;
 }
 
 void xsdbWatch(int fd, xsdbWatchCallback callback)

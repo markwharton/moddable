@@ -51,6 +51,8 @@ static int gRawTerminal = 0;
 static pid_t gChildren[kMaxChildren];
 static int gChildCount = 0;
 static int gChildPipe[2] = {-1, -1};
+static int gExitPipe[2] = {-1, -1};
+static volatile sig_atomic_t gExitSignal = 0;
 
 static xsMachine *gMachine = NULL;
 static xsSlot gStdinCallback;
@@ -78,10 +80,19 @@ static void killChildren(void)
 	gChildCount = 0;
 }
 
+// the handler only notes the signal; exitCallback runs on the run loop, where exit() is safe
 static void onTerminatingSignal(int signal)
 {
+	char byte = 0;
+	gExitSignal = signal;
+	if ((gExitPipe[1] >= 0) && (write(gExitPipe[1], &byte, 1) < 0))
+		;
+}
+
+static void exitCallback(int fd)
+{
 	// atexit handlers restore the terminal and stop the children
-	exit(128 + signal);
+	exit(128 + gExitSignal);
 }
 
 static void trackChild(pid_t pid)
@@ -531,6 +542,11 @@ int main(int argc, char* argv[])
 	atexit(restoreTerminal);
 
 	signal(SIGPIPE, SIG_IGN);
+	if (pipe(gExitPipe) == 0) {
+		fcntl(gExitPipe[0], F_SETFL, fcntl(gExitPipe[0], F_GETFL) | O_NONBLOCK);
+		fcntl(gExitPipe[1], F_SETFL, fcntl(gExitPipe[1], F_GETFL) | O_NONBLOCK);
+		xsdbWatch(gExitPipe[0], exitCallback);
+	}
 	signal(SIGINT, onTerminatingSignal);
 	signal(SIGTERM, onTerminatingSignal);
 	signal(SIGHUP, onTerminatingSignal);

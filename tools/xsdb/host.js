@@ -48,8 +48,10 @@ export class Host {
 	// forward slashes throughout, which Windows accepts too
 	static resolve(input) {
 		input = input.replaceAll("\\", "/");
-		const drive = /^[A-Za-z]:/.exec(input)?.[0] ?? "";
-		let path = (input.startsWith("/") || drive) ? input.slice(drive.length) : Host.join(Host.cwd().replaceAll("\\", "/"), input);
+		const absolute = input.startsWith("/") || /^[A-Za-z]:/.test(input);
+		let path = absolute ? input : Host.join(Host.cwd().replaceAll("\\", "/"), input);
+		const drive = /^[A-Za-z]:/.exec(path)?.[0] ?? "";
+		path = path.slice(drive.length);
 		const result = [];
 		for (const part of path.split("/")) {
 			if ((part === "") || (part === "."))
