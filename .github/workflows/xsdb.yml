@@ -1,0 +1,76 @@
+name: xsdb
+
+# Builds the SDK tools and xsdb on macOS, Linux, and Windows, then runs the fake-debuggee
+# smoke test against the binary. modxml is fetched by the manifest's git include; when the
+# repository is private, set the MODXML_TOKEN secret and the checkout below seeds the clone.
+
+on:
+  push:
+    branches: [feat/xsdb-xs]
+    paths:
+      - "tools/xsdb/**"
+      - "tools/mcconfig/**"
+      - "build/makefiles/**"
+      - ".github/workflows/xsdb.yml"
+  pull_request:
+    paths:
+      - "tools/xsdb/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+            bin: build/bin/mac/release/xsdb
+          - os: ubuntu-latest
+            platform: lin
+            bin: build/bin/lin/release/xsdb
+          - os: windows-latest
+            platform: win
+            bin: build/bin/win/release/xsdb.exe
+    runs-on: ${{ matrix.os }}
+    env:
+      MODDABLE: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Seed the modxml checkout the manifest expects
+        uses: actions/checkout@v4
+        with:
+          repository: markwharton/modxml
+          ref: v0.1.1
+          token: ${{ secrets.MODXML_TOKEN || github.token }}
+          path: build/tmp/${{ matrix.platform }}/release/xsdb/repos/github.com/markwharton/modxml/v0.1.1
+
+      - name: Linux packages
+        if: matrix.platform == 'lin'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
+
+      - name: Build tools (macOS)
+        if: matrix.platform == 'mac'
+        run: cd build/makefiles/mac && make
+
+      - name: Build tools (Linux)
+        if: matrix.platform == 'lin'
+        run: cd build/makefiles/lin && make
+
+      - name: MSVC x86 environment
+        if: matrix.platform == 'win'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Build tools (Windows)
+        if: matrix.platform == 'win'
+        shell: cmd
+        run: cd build\makefiles\win && build.bat
+
+      - name: Smoke test
+        shell: bash
+        run: |
+          export PATH="$MODDABLE/build/bin/${{ matrix.platform }}/release:$PATH"
+          python3 tools/xsdb/test/fakedebuggee.py "${{ matrix.bin }}"
