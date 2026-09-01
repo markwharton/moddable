@@ -47,7 +47,8 @@ jobs:
       - name: Read the modxml tag from the manifest
         id: pin
         shell: bash
-        run: echo "tag=$(sed -n 's/.*"tag": "\(v[^"]*\)".*/\1/p' tools/xsdb/manifest.json)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=$(sed -n 's/.*"tag": "\(v[^"]*\)".*/\1/p' tools/xsdb/manifest.json)" >> "$GITHUB_OUTPUT"
 
       - name: Seed the modxml checkout the manifest expects
         uses: actions/checkout@v4
