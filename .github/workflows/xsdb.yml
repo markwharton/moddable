@@ -44,13 +44,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Read the modxml tag from the manifest
+        id: pin
+        shell: bash
+        run: echo "tag=$(sed -n 's/.*"tag": "\(v[^"]*\)".*/\1/p' tools/xsdb/manifest.json)" >> "$GITHUB_OUTPUT"
+
       - name: Seed the modxml checkout the manifest expects
         uses: actions/checkout@v4
         with:
           repository: markwharton/modxml
-          ref: v0.2.1
+          ref: ${{ steps.pin.outputs.tag }}
           token: ${{ secrets.MODXML_TOKEN || github.token }}
-          path: build/tmp/${{ matrix.platform }}/release/xsdb/repos/github.com/markwharton/modxml/v0.2.1
+          path: build/tmp/${{ matrix.platform }}/release/xsdb/repos/github.com/markwharton/modxml/${{ steps.pin.outputs.tag }}
 
       - name: SDK tools on PATH
         shell: bash
