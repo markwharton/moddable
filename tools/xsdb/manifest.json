@@ -4,7 +4,7 @@
 		"$(MODDABLE)/modules/files/file/manifest.json",
 		{
 			"git": "https://github.com/markwharton/modxml.git",
-			"tag": "v0.2.1"
+			"tag": "v0.4.0"
 		}
 	],
 	"modules": {
